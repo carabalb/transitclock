@@ -114,7 +114,6 @@ public class CoreConfig {
 	static {
 		// Can add all the modules that should be started as default here
 		//optionalModulesDefaultList.add("org.transitime.avl.NextBusAvlModule");
-        optionalModulesDefaultList.add("org.transitime.avl.BatchCsvAvlFeedModule");
 	}	
 	private static StringListConfigValue optionalModules = 
 			new StringListConfigValue("transitime.modules.optionalModulesList", 
