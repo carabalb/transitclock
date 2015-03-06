@@ -28,8 +28,11 @@ public enum BlockAssignmentMethod {
 	AVL_FEED_BLOCK_ASSIGNMENT,
 	
 	// AVL feed provided a route assignment
-	AVL_FEED_ROUTE_ASSIGNMENT,
-	
+    AVL_FEED_ROUTE_ASSIGNMENT,
+
+    // AVL feed provided a route assignment
+    AVL_FEED_TRIP_ASSIGNMENT,
+
 	// Separate block feed provided the assignment. Not currently implemented!
 	BLOCK_FEED,
 	

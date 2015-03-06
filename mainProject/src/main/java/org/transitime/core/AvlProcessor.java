@@ -16,10 +16,6 @@
  */
 package org.transitime.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -31,15 +27,14 @@ import org.transitime.core.autoAssigner.AutoBlockAssigner;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Route;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.VehicleEvent;
+import org.transitime.db.structs.*;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This is a very important high-level class. It takes the AVL data and
@@ -375,43 +370,43 @@ public class AvlProcessor {
 	 *            made to a route or to a block. Should therefore be "block" or
 	 *            "route".
 	 */
-	private void updateVehicleStateFromAssignment(TemporalMatch bestMatch,
-			VehicleState vehicleState,
-			BlockAssignmentMethod possibleBlockAssignmentMethod,
-			String assignmentId, String assignmentType) {
-		// Convenience variables
-		AvlReport avlReport = vehicleState.getAvlReport();
+    private void updateVehicleStateFromAssignment(TemporalMatch bestMatch,
+                                                  VehicleState vehicleState,
+                                                  BlockAssignmentMethod possibleBlockAssignmentMethod,
+                                                  String assignmentId, String assignmentType) {
+        // Convenience variables
+        AvlReport avlReport = vehicleState.getAvlReport();
 
-		// If got a valid match then keep track of state
-		BlockAssignmentMethod blockAssignmentMethod = null;
-		boolean predictable = false;
-		Block block = null;
-		if (bestMatch != null) {
-			blockAssignmentMethod = possibleBlockAssignmentMethod;
-			predictable = true;
-			block = bestMatch.getBlock();
-			logger.info("vehicleId={} matched to {}Id={}. "
-					+ "Vehicle is now predictable. Match={}",
-					avlReport.getVehicleId(), assignmentType, assignmentId,
-					bestMatch);
+        // If got a valid match then keep track of state
+        BlockAssignmentMethod blockAssignmentMethod = null;
+        boolean predictable = false;
+        Block block = null;
+        if (bestMatch != null) {
+            blockAssignmentMethod = possibleBlockAssignmentMethod;
+            predictable = true;
+            block = bestMatch.getBlock();
+            logger.info("vehicleId={} matched to {}Id={}. "
+                            + "Vehicle is now predictable. Match={}",
+                    avlReport.getVehicleId(), assignmentType, assignmentId,
+                    bestMatch);
 
-			// Record a corresponding VehicleEvent
-			String eventDescription = "Vehicle successfully matched to "
-					+ assignmentType + " assignment and is now predictable.";
-			VehicleEvent.create(avlReport, bestMatch, VehicleEvent.PREDICTABLE,
-					eventDescription, true, // predictable
-					false, // becameUnpredictable
-					null); // supervisor
-		} else {
-			logger.debug("For vehicleId={} could not assign to {}Id={}. "
-					+ "Therefore vehicle is not being made predictable.",
-					avlReport.getVehicleId(), assignmentType, assignmentId);
-		}
+            // Record a corresponding VehicleEvent
+            String eventDescription = "Vehicle successfully matched to "
+                    + assignmentType + " assignment and is now predictable.";
+            VehicleEvent.create(avlReport, bestMatch, VehicleEvent.PREDICTABLE,
+                    eventDescription, true, // predictable
+                    false, // becameUnpredictable
+                    null); // supervisor
+        } else {
+            logger.debug("For vehicleId={} could not assign to {}Id={}. "
+                            + "Therefore vehicle is not being made predictable.",
+                    avlReport.getVehicleId(), assignmentType, assignmentId);
+        }
 
-		// Update the vehicle state with the determined block assignment
-		// and match. Of course might not have been successful in
-		// matching vehicle, but still should update VehicleState.
-		vehicleState.setMatch(bestMatch);
+        // Update the vehicle state with the determined block assignment
+        // and match. Of course might not have been successful in
+        // matching vehicle, but still should update VehicleState.
+        vehicleState.setMatch(bestMatch);
 		vehicleState.setBlock(block, blockAssignmentMethod, assignmentId,
 				predictable);
 	}
@@ -518,6 +513,45 @@ public class AvlProcessor {
 		return bestMatch != null;
 	}
 
+
+
+
+
+
+    /**
+     * Attempts to match the vehicle to the new block assignment. Updates the
+     * VehicleState with the new block assignment and match. These will be null
+     * if vehicle could not successfully be matched to block.
+     *
+     * @param trip
+     * @param vehicleState
+     * @return True if successfully matched vehicle to block assignment
+     */
+    private boolean matchVehicleToTripAssignment(Trip trip,
+                                                  VehicleState vehicleState) {
+        return matchVehicleToTripOrBlockAssignment(trip, trip.getBlock(), vehicleState);
+    }
+
+    /**
+     * Attempts to match the vehicle to the new block assignment. Updates the
+     * VehicleState with the new block assignment and match. These will be null
+     * if vehicle could not successfully be matched to block.
+     *
+     * @param block
+     * @param vehicleState
+     * @return True if successfully matched vehicle to block assignment
+     */
+    private boolean matchVehicleToBlockAssignment(Block block,
+                                                  VehicleState vehicleState) {
+        return matchVehicleToTripOrBlockAssignment(null, block, vehicleState);
+    }
+
+
+
+
+
+
+
 	/**
 	 * Attempts to match the vehicle to the new block assignment. Updates the
 	 * VehicleState with the new block assignment and match. These will be null
@@ -527,7 +561,7 @@ public class AvlProcessor {
 	 * @param vehicleState
 	 * @return True if successfully matched vehicle to block assignment
 	 */
-	private boolean matchVehicleToBlockAssignment(Block block,
+	private boolean matchVehicleToTripOrBlockAssignment(Trip avlAssignedTrip, Block block,
 			VehicleState vehicleState) {
 		// Make sure params are good
 		if (block == null) {
@@ -545,7 +579,13 @@ public class AvlProcessor {
 		// active. Currently active means that the AVL time is within
 		// reasonable range of the start time and within the end time of
 		// the trip.
-		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
+		List<Trip> potentialTrips;
+        if(avlAssignedTrip == null){
+            potentialTrips = block.getTripsCurrentlyActive(avlReport);
+        }else{
+            potentialTrips = new ArrayList<>();
+            potentialTrips.add(avlAssignedTrip);
+        }
 		List<SpatialMatch> spatialMatches = SpatialMatcher.getSpatialMatches(
 				vehicleState.getAvlReport(), potentialTrips, block);
 		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
@@ -610,9 +650,16 @@ public class AvlProcessor {
 		}
 
 		// Update the state of the vehicle
-		updateVehicleStateFromAssignment(bestMatch, vehicleState,
-				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, block.getId(),
-				"block");
+        if(avlAssignedTrip != null){
+            updateVehicleStateFromAssignment(bestMatch, vehicleState,
+                    BlockAssignmentMethod.AVL_FEED_TRIP_ASSIGNMENT, avlAssignedTrip.getId(),
+                    "trip");
+
+        }else{
+            updateVehicleStateFromAssignment(bestMatch, vehicleState,
+                    BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, block.getId(),
+                    "block");
+        }
 
 		// Return true if predictable
 		return bestMatch != null;
@@ -683,6 +730,12 @@ public class AvlProcessor {
 			makeVehicleUnpredictableAndTerminateAssignment(vehicleState,
 					eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
 		}
+
+        Trip trip = TripAssigner.getInstance().getTripAssignment(avlReport);
+
+        if(trip != null){
+            return matchVehicleToTripAssignment(trip, vehicleState);
+        }
 
 		// If the vehicle has a block assignment from the AVLFeed
 		// then use it.
@@ -979,6 +1032,9 @@ public class AvlProcessor {
 
 			// Do the matching depending on the old and the new assignment
 			// for the vehicle.
+
+            boolean test = vehicleState.hasNewAssignment(avlReport);
+
 			boolean matchAlreadyPredictableVehicle = 
 					vehicleState.isPredictable()
 					&& !vehicleState.hasNewAssignment(avlReport);
