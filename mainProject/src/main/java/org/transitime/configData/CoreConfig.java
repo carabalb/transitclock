@@ -15,14 +15,11 @@
  */
 package org.transitime.configData;
 
+import org.transitime.config.*;
+import org.transitime.utils.Time;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.transitime.config.BooleanConfigValue;
-import org.transitime.config.DoubleConfigValue;
-import org.transitime.config.FloatConfigValue;
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.config.StringListConfigValue;
-import org.transitime.utils.Time;
 
 /**
  * Handles the core configuration data file. Allows parameters to be read in
@@ -117,6 +114,7 @@ public class CoreConfig {
 	static {
 		// Can add all the modules that should be started as default here
 		//optionalModulesDefaultList.add("org.transitime.avl.NextBusAvlModule");
+        optionalModulesDefaultList.add("org.transitime.avl.BatchCsvAvlFeedModule");
 	}	
 	private static StringListConfigValue optionalModules = 
 			new StringListConfigValue("transitime.modules.optionalModulesList", 
