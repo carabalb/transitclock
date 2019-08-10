@@ -2,13 +2,11 @@ package org.transitime.core.dataCache;
 
 import java.util.Comparator;
 
-import org.transitime.db.structs.IArrivalDeparture;
-
-public class ArrivalDepartureComparator implements Comparator<IArrivalDeparture> {
+public class CachedArrivalDepartureComparator implements Comparator<ITripHistoryArrivalDeparture> {
 	
 
 	@Override
-	public int compare(IArrivalDeparture ad1, IArrivalDeparture ad2) {
+	public int compare(ITripHistoryArrivalDeparture ad1, ITripHistoryArrivalDeparture ad2) {
 		
 		if(ad1.getDate().getTime()<ad2.getDate().getTime())
 		{

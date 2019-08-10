@@ -1,9 +1,9 @@
 package org.transitime.core.dataCache;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -13,6 +13,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
@@ -144,15 +145,15 @@ public class HistoricalAverageCache {
 		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
 				nearestDay,
 				trip.getStartTime());
-						
-		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+
+		Set<ITripHistoryArrivalDeparture> arrivalDepartures=(Set<ITripHistoryArrivalDeparture>) TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
-		{			
-			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
+		{
+			ITripHistoryArrivalDeparture previousEvent = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(arrivalDepartures, new TripHistoryArrivalDeparture(arrivalDeparture));
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isDeparture())
-					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+					return Math.abs(previousEvent.getDate().getTime()-arrivalDeparture.getTime());
 		}
 					
 		return -1;
@@ -164,14 +165,14 @@ public class HistoricalAverageCache {
 				nearestDay,
 				trip.getStartTime());
 						
-		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+		Set<ITripHistoryArrivalDeparture> arrivalDepartures=(Set<ITripHistoryArrivalDeparture>) TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isDeparture())
-		{			
-			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousArrivalEvent(arrivalDepartures, arrivalDeparture);
+		{
+			ITripHistoryArrivalDeparture previousEvent = TripDataHistoryCacheFactory.getInstance().findPreviousArrivalEvent(arrivalDepartures, new TripHistoryArrivalDeparture(arrivalDeparture));
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isArrival())
-					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+					return Math.abs(previousEvent.getDate().getTime()-arrivalDeparture.getTime());
 		}
 		return -1;
 	}

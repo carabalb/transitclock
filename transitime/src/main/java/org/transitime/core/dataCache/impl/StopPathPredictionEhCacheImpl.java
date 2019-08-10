@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.core.Indices;
-import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.StopPathPredictionsCache;
 import org.transitime.db.structs.PredictionForStopPath;
 
 import net.sf.ehcache.Cache;
@@ -15,18 +15,14 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 
-public class StopPathPredictionCache {
+public class StopPathPredictionEhCacheImpl implements StopPathPredictionsCache {
 	final private static String cacheName = "StopPathPredictionCache";
-	private static StopPathPredictionCache singleton = new StopPathPredictionCache();
 	private static final Logger logger = LoggerFactory
-			.getLogger(StopPathPredictionCache.class);
+			.getLogger(StopPathPredictionEhCacheImpl.class);
 	
 	private Cache cache = null;
 	
-	public static StopPathPredictionCache getInstance() {
-		return singleton;
-	}
-	private StopPathPredictionCache() {
+	public StopPathPredictionEhCacheImpl() {
 		CacheManager cm = CacheManager.getInstance();
 		
 		if (cm.getCache(cacheName) == null) {
@@ -64,6 +60,8 @@ public class StopPathPredictionCache {
 			}
 		}		
 	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public List<PredictionForStopPath> getPredictions(StopPathCacheKey key) {		
 						
@@ -74,11 +72,15 @@ public class StopPathPredictionCache {
 		else
 			return (List<PredictionForStopPath>) result.getObjectValue();		
 	}
+
+	@Override
 	public void putPrediction(PredictionForStopPath prediction)
 	{
 		StopPathCacheKey key=new StopPathCacheKey(prediction.getTripId(), prediction.getStopPathIndex());
 		putPrediction(key,prediction);
 	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public void putPrediction(StopPathCacheKey key,  PredictionForStopPath prediction) {
 		
@@ -96,7 +98,9 @@ public class StopPathPredictionCache {
 		Element predictions = new Element(key, Collections.synchronizedList(list));
 
 		cache.put(predictions);				
-	}		
+	}
+
+	@Override
 	public List<StopPathCacheKey> getKeys()
 	{
 		@SuppressWarnings("unchecked")

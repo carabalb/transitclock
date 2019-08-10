@@ -46,6 +46,8 @@ import org.transitime.applications.Core;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.core.TemporalDifference;
+import org.transitime.core.dataCache.IStopArrivalDeparture;
+import org.transitime.core.dataCache.ITripHistoryArrivalDeparture;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.logging.Markers;
 import org.transitime.utils.Geo;
@@ -73,7 +75,7 @@ import org.transitime.utils.Time;
                       columnList="time" ),
                    @Index(name="ArrivalsDeparturesRouteTimeIndex", 
                       columnList="routeShortName, time" )} )
-public class ArrivalDeparture implements Lifecycle, Serializable  {
+public class ArrivalDeparture implements IStopArrivalDeparture, ITripHistoryArrivalDeparture, Lifecycle, Serializable  {
 	
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -581,7 +583,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	/**
 	 * Read in arrivals and departures for a vehicle, over a time range.
 	 * 
-	 * @param projectId
 	 * @param beginTime
 	 * @param endTime
 	 * @param vehicleId
@@ -604,7 +605,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * 
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -621,7 +622,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -647,7 +648,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param stopPathIndex
 	 * @return
 	 */

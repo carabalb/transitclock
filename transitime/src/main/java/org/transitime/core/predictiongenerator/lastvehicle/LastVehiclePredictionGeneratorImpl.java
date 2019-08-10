@@ -11,9 +11,7 @@ import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 
-import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.StopPathCacheKey;
-import org.transitime.core.dataCache.StopPathPredictionCache;
+import org.transitime.core.dataCache.factory.StopPathPredictionCacheFactory;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
@@ -77,7 +75,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE");				
 				
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
-				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+				StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 			}
 			
 			return time;

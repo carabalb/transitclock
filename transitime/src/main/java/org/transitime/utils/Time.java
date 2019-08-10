@@ -72,6 +72,8 @@ public class Time {
 	public static final int MIN_PER_HOUR = 60;
 	public static final int HOUR_IN_MINS = MIN_PER_HOUR;
 
+	public static final int MIN_PER_DAY = 24 * MIN_PER_HOUR;
+
 	public static final long NSEC_PER_MSEC = 1000000;
 	public static final long MSEC_IN_NSECS = NSEC_PER_MSEC;
 	

@@ -12,7 +12,7 @@ import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 
 import org.transitime.core.dataCache.StopPathCacheKey;
-import org.transitime.core.dataCache.StopPathPredictionCache;
+import org.transitime.core.dataCache.factory.StopPathPredictionCacheFactory;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
@@ -59,7 +59,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 			{
 				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE");			
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
-				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+				StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 			}
 			
 			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+alternative+" prediction: "

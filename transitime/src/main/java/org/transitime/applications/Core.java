@@ -39,9 +39,9 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
 import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
-import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
@@ -378,31 +378,34 @@ public class Core {
 	}
 	
 	private static void fillHistoricalCaches() {
-	  Session session = HibernateUtils.getSession();
+	    Session session = HibernateUtils.getSession();
     
-    Date endDate=Calendar.getInstance().getTime();
-    /* populate one day at a time to avoid memory issue */
-    for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-    {
-      Date startDate=DateUtils.addDays(endDate, -1);
-      
-      logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-      TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-      
-      endDate=startDate;
-    }
-          
-    endDate=Calendar.getInstance().getTime();
-    /* populate one day at a time to avoid memory issue */
-    for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-    {
-      Date startDate=DateUtils.addDays(endDate, -1);
-      
-      logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-      StopArrivalDepartureCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-      
-      endDate=startDate;
-    }
+        Date endDate=Calendar.getInstance().getTime();
+        /* populate one day at a time to avoid memory issue */
+        for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+        {
+          Date startDate=DateUtils.addDays(endDate, -1);
+
+          logger.info("Populating TripDataHistory cache for period {} to {}",startDate,endDate);
+          TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+          logger.info("Finished populating TripDataHistory cache for period {} to {}",startDate,endDate);
+
+          endDate=startDate;
+        }
+
+        endDate=Calendar.getInstance().getTime();
+
+        /* populate one day at a time to avoid memory issue */
+        for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+        {
+          Date startDate=DateUtils.addDays(endDate, -1);
+
+          logger.info("Populating StopArrivalDeparture cache for period {} to {}",startDate,endDate);
+          StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+          logger.info("Finished populating StopArrivalDeparture cache for period {} to {}",startDate,endDate);
+
+          endDate=startDate;
+        }
 	}
 	
 	

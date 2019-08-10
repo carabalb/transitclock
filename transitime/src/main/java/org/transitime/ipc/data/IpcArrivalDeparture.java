@@ -1,12 +1,12 @@
 package org.transitime.ipc.data;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.transitime.core.dataCache.IStopArrivalDeparture;
+import org.transitime.core.dataCache.ITripHistoryArrivalDeparture;
 import org.transitime.db.structs.ArrivalDeparture;
 /**
  * For IPC for obtaining arrival and departure events for a stop that are in the cache.
@@ -56,7 +56,6 @@ public class IpcArrivalDeparture implements Serializable {
 	private float stopPathLength;
 	
 	public IpcArrivalDeparture(ArrivalDeparture arrivalDepature) throws Exception {
-		
 		this.vehicleId=arrivalDepature.getVehicleId();
 		this.time=new Date(arrivalDepature.getTime());
 		this.routeId=arrivalDepature.getRouteId();
@@ -65,6 +64,28 @@ public class IpcArrivalDeparture implements Serializable {
 		this.stopId=arrivalDepature.getStopId();
 		this.stopPathIndex=arrivalDepature.getStopPathIndex();
 		this.scheduledTime=arrivalDepature.getScheduledDate();
+	}
+
+	public IpcArrivalDeparture(ITripHistoryArrivalDeparture arrivalDepature) throws Exception {
+		this.vehicleId = arrivalDepature.getVehicleId();
+		this.time= arrivalDepature.getDate();
+		this.routeId = arrivalDepature.getRouteId();
+		this.tripId= arrivalDepature.getTripId();
+		this.isArrival= arrivalDepature.isArrival();
+		this.stopId= arrivalDepature.getStopId();
+		this.stopPathIndex= arrivalDepature.getStopPathIndex();
+		this.scheduledTime= arrivalDepature.getScheduledDate();
+	}
+
+	public IpcArrivalDeparture(IStopArrivalDeparture arrivalDepature) throws Exception {
+		this.vehicleId = arrivalDepature.getVehicleId();
+		this.time= arrivalDepature.getDate();
+		this.routeId = arrivalDepature.getRouteId();
+		this.tripId= arrivalDepature.getTripId();
+		this.isArrival= arrivalDepature.isArrival();
+		this.stopId= arrivalDepature.getStopId();
+		this.stopPathIndex= arrivalDepature.getStopPathIndex();
+		this.scheduledTime= arrivalDepature.getScheduledDate();
 	}
 	
 	@Override

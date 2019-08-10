@@ -25,9 +25,8 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.HistoricalAverageCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
-import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
+import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -313,8 +312,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * the AVL time. Otherwise this indicates there was a problem determining
 	 * the arrival/departure time.
 	 * 
-	 * @param time
-	 * @param avlReport
+	 * @param arrivalDeparture
 	 * @return true if arrival/departure time within 30 minutes of the AVL
 	 *         report time.
 	 */
@@ -376,9 +374,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				int tripIndex, int stopPathIndex, boolean isArrival) {*/
 		
 		if (CoreConfig.getFillHistoricalCaches()) {
-		  TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
+
+		  TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 		
-		  StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		  StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 		
 		  HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		}
@@ -392,7 +391,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * so that the problem is made more obvious.
 	 * 
 	 * @param vehicleState
-	 * @param arrivalDeparture
+	 * @param departure
 	 */
 	private void logEventIfVehicleDepartedEarlyOrLate(VehicleState vehicleState, 
 			Departure departure) {

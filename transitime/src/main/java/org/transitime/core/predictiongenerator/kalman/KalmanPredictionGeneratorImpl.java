@@ -14,9 +14,11 @@ import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.KalmanErrorCache;
-import org.transitime.core.dataCache.KalmanErrorCacheKey;
-import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
+import org.transitime.core.dataCache.factory.KalmanErrorCacheFactory;
+import org.transitime.core.dataCache.KalmanErrorCacheKey;
+import org.transitime.core.dataCache.factory.StopPathPredictionCacheFactory;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
@@ -65,9 +67,9 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 		logger.debug("Calling Kalman prediction algorithm for : "+indices.toString());
 		
-		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
+		TripDataHistoryCache tripCache = TripDataHistoryCacheFactory.getInstance();
 
-		KalmanErrorCache kalmanErrorCache = KalmanErrorCache.getInstance();
+		KalmanErrorCache kalmanErrorCache = KalmanErrorCacheFactory.getInstance();
 		
 		VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 
@@ -145,7 +147,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 					long predictionTime = (long) kalmanPredictionResult.getResult();
 
 					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
-					
+
 					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
 					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
@@ -155,7 +157,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 					{
 						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN");					
 						Core.getInstance().getDbLogger().add(predictionForStopPath);
-						StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+						StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 					}													
 					return predictionTime;
 					
@@ -167,7 +169,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 		return super.getTravelTimeForPath(indices, avlReport);
 	}
 
-	private Double lastVehiclePredictionError(KalmanErrorCache cache, Indices indices) {		
+	private Double lastVehiclePredictionError(KalmanErrorCache cache, Indices indices) {
 		Double result = cache.getErrorValue(indices);
 		if(result!=null)
 		{
@@ -190,7 +192,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	@Override
 	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
 
-		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();		
+		TripDataHistoryCache tripCache = TripDataHistoryCacheFactory.getInstance();
 		VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
 	

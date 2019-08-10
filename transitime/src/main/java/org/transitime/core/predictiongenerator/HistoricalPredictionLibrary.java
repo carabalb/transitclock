@@ -17,28 +17,18 @@
 
 package org.transitime.core.predictiongenerator;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.transitime.applications.Core;
-import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
-import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
+import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
 import org.transitime.db.structs.Block;
 import org.transitime.gtfs.DbConfig;
-import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * Commonly-used methods for PredictionGenerators that use historical cached data.
@@ -63,22 +53,22 @@ public class HistoricalPredictionLibrary {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+			Set<IStopArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			Set<IStopArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 	
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
-				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+				for (IStopArrivalDeparture currentArrivalDeparture : currentStopList) {
 					
 					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
 					{
-						ArrivalDeparture found;
+						IStopArrivalDeparture found;
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							if(found.getTime() - currentArrivalDeparture.getTime()>0)
+							if(found.getDate().getTime() - currentArrivalDeparture.getDate().getTime()>0)
 							{																
-								return found.getTime() - currentArrivalDeparture.getTime();
+								return found.getDate().getTime() - currentArrivalDeparture.getDate().getTime();
 							}else
 							{
 								// must be going backwards
@@ -108,20 +98,20 @@ public class HistoricalPredictionLibrary {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+			Set<IStopArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			Set<IStopArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 	
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
-				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+				for (IStopArrivalDeparture currentArrivalDeparture : currentStopList) {
 					
 					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
 					{
-						ArrivalDeparture found;
+						IStopArrivalDeparture found;
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							if(found.getTime() - currentArrivalDeparture.getTime()>0)
+							if(found.getDate().getTime() - currentArrivalDeparture.getDate().getTime()>0)
 							{	
 								Block currentBlock=null;
 								/* block is transient in arrival departure so when read from database need to get from dbconfig. */ 
@@ -152,9 +142,9 @@ public class HistoricalPredictionLibrary {
 		return null;
 	}
 	/* TODO could also make it a requirement that it is on the same route as the one we are generating prediction for */
-	private static ArrivalDeparture findMatchInList(List<ArrivalDeparture> nextStopList,
-			ArrivalDeparture currentArrivalDeparture) {
-		for (ArrivalDeparture nextStopArrivalDeparture : nextStopList) {			
+	private static IStopArrivalDeparture findMatchInList(Set<IStopArrivalDeparture> nextStopList,
+														 IStopArrivalDeparture currentArrivalDeparture) {
+		for (IStopArrivalDeparture nextStopArrivalDeparture : nextStopList) {
 			if (currentArrivalDeparture.getVehicleId() == nextStopArrivalDeparture.getVehicleId()
 					&& currentArrivalDeparture.getTripId() == nextStopArrivalDeparture.getTripId()
 					&&  currentArrivalDeparture.isDeparture() && nextStopArrivalDeparture.isArrival() ) {
@@ -209,10 +199,10 @@ public class HistoricalPredictionLibrary {
 	}
 
 	public static List<Integer> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
-			Integer startTime, int num_days_look_back, int num_days) {
+                                              Integer startTime, int num_days_look_back, int num_days) {
 
 		List<Integer> times = new ArrayList<Integer>();
-		List<ArrivalDeparture> results = null;
+		Set<ITripHistoryArrivalDeparture> results = null;
 		int num_found = 0;
 		/*
 		 * TODO This could be smarter about the dates it looks at by looking at
@@ -230,9 +220,9 @@ public class HistoricalPredictionLibrary {
 
 			if (results != null) {
 
-				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
-				
-				ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
+                ITripHistoryArrivalDeparture arrival = getArrival(stopPathIndex, results);
+
+                ITripHistoryArrivalDeparture departure = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(results, arrival);
 														
 				if (arrival != null && departure != null) {
 
@@ -243,9 +233,9 @@ public class HistoricalPredictionLibrary {
 		}
 		return times;		
 	}
-	private static ArrivalDeparture getArrival(int stopPathIndex, List<ArrivalDeparture> results)
+	private static ITripHistoryArrivalDeparture getArrival(int stopPathIndex, Set<ITripHistoryArrivalDeparture> results)
 	{
-		for(ArrivalDeparture result:results)
+		for(ITripHistoryArrivalDeparture result:results)
 		{
 			if(result.isArrival()&&result.getStopPathIndex()==stopPathIndex)
 			{
@@ -254,9 +244,9 @@ public class HistoricalPredictionLibrary {
 		}
 		return null;	
 	}
-	private static long timeBetweenStops(ArrivalDeparture ad1, ArrivalDeparture ad2) {
+	private static long timeBetweenStops(ITripHistoryArrivalDeparture ad1, ITripHistoryArrivalDeparture ad2) {
 		
-		return Math.abs(ad2.getTime() - ad1.getTime());		
+		return Math.abs(ad2.getDate().getTime() - ad1.getDate().getTime());
 	}
 
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
