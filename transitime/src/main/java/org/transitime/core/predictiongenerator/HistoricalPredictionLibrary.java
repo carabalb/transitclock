@@ -27,6 +27,7 @@ import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.*;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
+import org.transitime.core.dataCache.impl.BlockCacheEhCacheImpl;
 import org.transitime.core.dataCache.model.IStopArrivalDeparture;
 import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
 import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
@@ -120,10 +121,8 @@ public class HistoricalPredictionLibrary {
 								Block currentBlock=null;
 								/* block is transient in arrival departure so when read from database need to get from dbconfig. */ 
 								if(currentArrivalDeparture.getBlock()==null&&currentArrivalDeparture.getServiceId()!=null && currentArrivalDeparture.getBlockId()!=null)
-								{																																			
-									DbConfig dbConfig = Core.getInstance().getDbConfig();
-									
-									currentBlock=dbConfig.getBlock(currentArrivalDeparture.getServiceId(), currentArrivalDeparture.getBlockId());
+								{
+									currentBlock=getBlock(currentArrivalDeparture.getServiceId(), currentArrivalDeparture.getBlockId());
 								}else
 								{
 									currentBlock=currentArrivalDeparture.getBlock();
@@ -144,6 +143,17 @@ public class HistoricalPredictionLibrary {
 			}
 		}
 		return null;
+	}
+
+	private static Block getBlock(String serviceId, String blockId){
+		Block block = BlockCacheEhCacheImpl.getInstance().get(serviceId, blockId);
+		if(block == null){
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			block=dbConfig.getBlock(serviceId, blockId);
+			BlockCacheEhCacheImpl.getInstance().put(serviceId,blockId, block);
+		}
+		return block;
+
 	}
 	/* TODO could also make it a requirement that it is on the same route as the one we are generating prediction for */
 	private static IStopArrivalDeparture findMatchInList(Set<IStopArrivalDeparture> nextStopList,
