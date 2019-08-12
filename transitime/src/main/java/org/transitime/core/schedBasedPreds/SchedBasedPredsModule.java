@@ -31,7 +31,7 @@ import org.transitime.configData.AgencyConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
@@ -135,7 +135,7 @@ public class SchedBasedPredsModule extends Module {
 		// blocks.
 		Set<String> blockIdsAlreadyAssigned = new HashSet<String>();
 		Collection<IpcVehicleComplete> vehicles =
-				VehicleDataCache.getInstance()
+				VehicleDataCacheImpl.getInstance()
 						.getVehiclesIncludingSchedBasedOnes();
 		for (IpcVehicle vehicle : vehicles) {
 			String blockId = vehicle.getBlockId();
@@ -153,7 +153,7 @@ public class SchedBasedPredsModule extends Module {
 		// For each block about to start see if no associated vehicle
 		for (Block block : activeBlocks) {
 			// Is there a vehicle associated with the block?
-			Collection<String> vehiclesForBlock = VehicleDataCache.getInstance()
+			Collection<String> vehiclesForBlock = VehicleDataCacheImpl.getInstance()
 					.getVehiclesByBlockId(block.getId());
 			if (vehiclesForBlock == null || vehiclesForBlock.isEmpty()) {
 				// No vehicle associated with the active block so create a

@@ -24,14 +24,10 @@ import java.util.List;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.BlocksInfo;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.db.structs.Block;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Monitors how many vehicles are predictable compared to how many active blocks
@@ -109,7 +105,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		int predictableVehicleCount = 0;
 		for (Block block : activeBlocks) {
 			// Determine vehicles associated with the block if there are any
-			Collection<String> vehicleIdsForBlock = VehicleDataCache
+			Collection<String> vehicleIdsForBlock = VehicleDataCacheImpl
 					.getInstance().getVehiclesByBlockId(block.getId());
 			predictableVehicleCount += vehicleIdsForBlock.size();
 			

@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.transitime.applications.Core;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
@@ -113,7 +113,7 @@ public class IpcRoute extends IpcRouteSummary {
 		// Based on the first prediction determine the current IpcVehicle info
 		String vehicleId = ipcPreds.get(0).getVehicleId();
 		
-		IpcVehicleComplete vehicle = VehicleDataCache.getInstance().getVehicle(vehicleId);
+		IpcVehicleComplete vehicle = VehicleDataCacheImpl.getInstance().getVehicle(vehicleId);
 		
 		return new Location(vehicle.getLatitude(), vehicle.getLongitude());
 	}

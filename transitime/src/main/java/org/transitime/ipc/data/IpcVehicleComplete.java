@@ -33,7 +33,7 @@ import org.transitime.utils.Time;
 
 /**
  * Extension of IpcVehicle class so that all info describing vehicle is
- * included. All this info is put into the VehicleDataCache so that can get
+ * included. All this info is put into the VehicleDataCacheImpl so that can get
  * whatever data is needed be the remote clients. In particular, includes
  * additional info for SIRI feed. Made a separate class from IpcVehicle since
  * the SIRI feed is not expected to get significant use (it is a poor interface)

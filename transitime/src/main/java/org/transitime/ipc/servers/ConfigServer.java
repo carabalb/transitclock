@@ -26,7 +26,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
@@ -364,7 +364,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<String> getVehicleIds() throws RemoteException {
-		Collection<VehicleConfig> vehicleConfigs = VehicleDataCache.getInstance().getVehicleConfigs();
+		Collection<VehicleConfig> vehicleConfigs = VehicleDataCacheImpl.getInstance().getVehicleConfigs();
 		List<String> vehicleIds = new ArrayList<String>(vehicleConfigs.size());
 		for (VehicleConfig vehicleConfig : vehicleConfigs)
 			vehicleIds.add(vehicleConfig.getId());

@@ -11,8 +11,8 @@ import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.core.dataCache.factory.StopPathPredictionCacheFactory;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
@@ -45,7 +45,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 
 		logger.debug("Calling last vehicle algorithm : "+indices.toString());
 		
-		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
+		VehicleDataCacheImpl vehicleCache = VehicleDataCacheImpl.getInstance();
 		
 		List<VehicleState> vehiclesOnRoute = new ArrayList<VehicleState>();
 

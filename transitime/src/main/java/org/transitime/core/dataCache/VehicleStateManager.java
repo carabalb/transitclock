@@ -24,8 +24,8 @@ import org.transitime.core.VehicleState;
 
 /**
  * For keeping track of vehicle state. This is used by the main predictor code,
- * not for RMI clients. For RMI clients the VehicleDataCache is used. This way
- * making the system threadsafe is simpler since VehicleDataCache can handle
+ * not for RMI clients. For RMI clients the VehicleDataCacheImpl is used. This way
+ * making the system threadsafe is simpler since VehicleDataCacheImpl can handle
  * thread safety completely independently.
  * 
  * @author SkiBu Smith

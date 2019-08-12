@@ -19,7 +19,7 @@ package org.transitime.avl.calAmp;
 import java.util.Date;
 
 import org.transitime.avl.AvlExecutor;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.utils.Geo;
@@ -254,7 +254,7 @@ public class MiniEventReport extends Report {
 			// then use the mobile/tracker ID as the vehicle ID.
 			String mobileId = getMobileId();
 			VehicleConfig vehicleConfig =
-					VehicleDataCache.getInstance().getVehicleConfigByTrackerId(
+					VehicleDataCacheImpl.getInstance().getVehicleConfigByTrackerId(
 							mobileId);
 			String vehicleId =
 					vehicleConfig != null ? vehicleConfig.getId() : mobileId;

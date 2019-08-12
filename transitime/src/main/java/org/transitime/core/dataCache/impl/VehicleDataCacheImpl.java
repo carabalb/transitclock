@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,10 +51,10 @@ import org.transitime.utils.Time;
  * 
  * @author SkiBu Smith
  */
-public class VehicleDataCache {
+public class VehicleDataCacheImpl {
 
     // Make this class available as a singleton
-    private static VehicleDataCache singleton = new VehicleDataCache();
+    private static VehicleDataCacheImpl singleton = new VehicleDataCacheImpl();
 
     // Keyed by vehicle ID
     private Map<String, IpcVehicleComplete> vehiclesMap = 
@@ -92,7 +92,7 @@ public class VehicleDataCache {
     private static final int MAX_AGE_MSEC = 15 * Time.MS_PER_MIN;
     
     private static final Logger logger = LoggerFactory
-	    .getLogger(VehicleDataCache.class);
+	    .getLogger(VehicleDataCacheImpl.class);
 
     /********************** Member Functions **************************/
 
@@ -101,7 +101,7 @@ public class VehicleDataCache {
 	 * 
 	 * @return
 	 */
-	public static VehicleDataCache getInstance() {
+	public static VehicleDataCacheImpl getInstance() {
 		return singleton;
 	}
 
@@ -109,7 +109,7 @@ public class VehicleDataCache {
      * Constructor declared private to enforce only access to this singleton
      * class being getInstance()
      */
-    private VehicleDataCache() {
+    private VehicleDataCacheImpl() {
     }
 
     /**
@@ -533,7 +533,7 @@ public class VehicleDataCache {
 		IpcVehicleComplete vehicle = new IpcVehicleComplete(vehicleState);
 		IpcVehicleComplete originalVehicle = vehiclesMap.get(vehicle.getId());
 		
-		logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
+		logger.debug("Adding to VehicleDataCacheImpl vehicle={}", vehicle);
 
 		updateVehiclesByRouteMap(originalVehicle, vehicle);
 		updateVehicleIdsByBlockMap(originalVehicle, vehicle);

@@ -8,10 +8,10 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
-import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.model.HistoricalAverage;
+import org.transitime.core.dataCache.impl.HistoricalAverageCacheImpl;
 
-import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.model.StopPathCacheKey;
 import org.transitime.core.dataCache.factory.StopPathPredictionCacheFactory;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
@@ -19,8 +19,8 @@ import org.transitime.db.structs.PredictionForStopPath;
 
 /**
  * @author Sean Og Crudden
- *	This provides a prediction based on the average of historical data. The average is taken from the HistoricalAverageCache which is 
- *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
+ *	This provides a prediction based on the average of historical data. The average is taken from the HistoricalAverageCacheImpl which is
+ *  populated each time an arrival/departure event occurs. The HistoricalAverageCacheImpl is updated using data from the TripDataHistory cache.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
@@ -51,7 +51,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		 */				
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
 		
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(historicalAverageCacheKey);
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
@@ -78,7 +78,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),false);
 		
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(historicalAverageCacheKey);
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
@@ -93,7 +93,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 	@Override
 	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
 		StopPathCacheKey historicalAverageCacheKey = new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(historicalAverageCacheKey);
 		
 		return (average!=null && average.getCount()>=minDays.getValue());
 	}

@@ -38,7 +38,7 @@ import org.transitime.core.TemporalMatch;
 import org.transitime.core.TemporalMatcher;
 import org.transitime.core.TravelTimes;
 import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -190,7 +190,7 @@ public class AutoBlockAssigner {
 	 */
 	private boolean isBlockUnassigned(String blockId) {
 		Collection<String> vehicleIdsForBlock = 
-				VehicleDataCache.getInstance().getVehiclesByBlockId(blockId);
+				VehicleDataCacheImpl.getInstance().getVehiclesByBlockId(blockId);
 		// If no vehicles associated with the block then it is definitely
 		// unassigned.
 		if (vehicleIdsForBlock.isEmpty())

@@ -39,7 +39,7 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
 import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.impl.VehicleDataCacheImpl;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.db.hibernate.DataDbLogger;
@@ -418,7 +418,7 @@ public class Core {
 	public static void startRmiServers(String agencyId) {
 		// Start up all of the RMI servers
 		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
-		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
+		VehiclesServer.start(agencyId, VehicleDataCacheImpl.getInstance());
 		ConfigServer.start(agencyId);
 		ServerStatusServer.start(agencyId);
 		CommandsServer.start(agencyId);
