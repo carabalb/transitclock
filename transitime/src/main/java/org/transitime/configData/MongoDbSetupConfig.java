@@ -17,6 +17,7 @@
 
 package org.transitime.configData;
 
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 
@@ -40,12 +41,12 @@ public class MongoDbSetupConfig {
 
 	public static String getMongoUsername(){ return mongoUsername.getValue(); }
 	private static StringConfigValue mongoUsername = new StringConfigValue(
-			"transitime.cache.tripDataHistory.mongo.username", "",
+			"transitime.cache.tripDataHistory.mongo.username", null,
 			"Mongo DB connection username");
 
 	public static String getMongoPassword(){ return mongoPassword.getValue(); }
 	private static StringConfigValue mongoPassword = new StringConfigValue(
-			"transitime.cache.tripDataHistory.mongo.password", "",
+			"transitime.cache.tripDataHistory.mongo.password", null,
 			"Mongo DB connection password", false);
 
 	public static String getMongoDbName(){ return mongoDatabaseName.getValue(); }
@@ -53,4 +54,13 @@ public class MongoDbSetupConfig {
 			"transitime.cache.tripDataHistory.mongo.databaseName", "transitclock",
 			"Database to connect to in mongo db");
 
+	public static boolean getMongoSslEnabled() { return mongoSslEnabled.getValue(); }
+	private static BooleanConfigValue mongoSslEnabled = new BooleanConfigValue(
+			"transitime.cache.tripDataHistory.mongo.sslEnabled", false,
+			"Use SSL to connect to mongo db");
+
+	public static boolean getInvalidHostnameAllowed() { return mongoSslInvalidHostnameAllowed.getValue(); }
+	private static BooleanConfigValue mongoSslInvalidHostnameAllowed = new BooleanConfigValue(
+			"transitime.cache.tripDataHistory.mongo.sslInvalidHostnameAllowed", true,
+			"Allow SSL connection to mongo db with invalid hostname");
 }

@@ -1,13 +1,9 @@
 package org.transitime.db.mongo;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.config.StringConfigValue;
 import org.transitime.configData.MongoDbSetupConfig;
 
 import javax.annotation.PreDestroy;
@@ -39,15 +35,28 @@ public class MongoDB {
     private MongoDB() {
         try {
             String username = MongoDbSetupConfig.getMongoUsername();
-            char[] password = MongoDbSetupConfig.getMongoPassword().toCharArray();
-
-            String databaseName = MongoDbSetupConfig.getMongoDbName();
+            String password = MongoDbSetupConfig.getMongoPassword();
             String host = MongoDbSetupConfig.getMongoHost();
+            String databaseName = MongoDbSetupConfig.getMongoDbName();
             Integer port = MongoDbSetupConfig.getMongoPort();
+            boolean sslEnabled = MongoDbSetupConfig.getMongoSslEnabled();
+            boolean sslInvalidHostNameAllowed = MongoDbSetupConfig.getInvalidHostnameAllowed();
 
-            MongoCredential credential = MongoCredential.createCredential(username,databaseName, password);
+            MongoClientOptions options = MongoClientOptions.builder()
+                                            .sslEnabled(sslEnabled)
+                                            .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                                            .build();
+
             ServerAddress mongoServerAddress = new ServerAddress(host, port);
-            MongoClient mongoClient = new MongoClient(mongoServerAddress);
+            MongoClient mongoClient = null;
+
+            if(username == null || password == null){
+                mongoClient = new MongoClient(mongoServerAddress, options);
+            } else {
+                MongoCredential credential = MongoCredential.createCredential(username,databaseName, password.toCharArray());
+                mongoClient = new MongoClient(mongoServerAddress, Arrays.asList(credential), options);
+            }
+
             database = mongoClient.getDatabase(databaseName);
 
             if(database != null){
