@@ -8,13 +8,15 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.transitime.core.dataCache.model.IStopArrivalDeparture;
 import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.IArrivalDeparture;
+
 /**
  * For IPC for obtaining arrival and departure events for a stop that are in the cache.
  *
  * @author Sean Og Crudden
  *
  */
-public class IpcArrivalDeparture implements Serializable {
+public class IpcArrivalDeparture implements IArrivalDeparture, Serializable {
 
 	
 	/**
@@ -282,4 +284,5 @@ public class IpcArrivalDeparture implements Serializable {
 	public void setStopPathLength(float stopPathLength) {
 		this.stopPathLength = stopPathLength;
 	}
+	public Date getDate() { return this.time; }
 }
