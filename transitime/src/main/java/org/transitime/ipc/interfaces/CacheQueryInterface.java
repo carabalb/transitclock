@@ -57,7 +57,7 @@ public interface CacheQueryInterface extends Remote {
 			throws RemoteException;
 	
 	/**
-	 * Returns the historical average value for the trip stopPathIndex that is held in the HistoricalAverageCache
+	 * Returns the historical average value for the trip stopPathIndex that is held in the HistoricalAverageCacheImpl
 	 * @param tripId
 	 * @param stopPathIndex
 	 * @return IpcHistoricalAverage

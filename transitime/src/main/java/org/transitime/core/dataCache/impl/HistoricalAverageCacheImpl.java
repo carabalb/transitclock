@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.impl;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -13,7 +13,12 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.TripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.TripKey;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
+import org.transitime.core.dataCache.model.HistoricalAverage;
+import org.transitime.core.dataCache.model.StopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
@@ -21,11 +26,11 @@ import org.transitime.gtfs.DbConfig;
  * @author Sean Og Crudden
  * 
  */
-public class HistoricalAverageCache {
+public class HistoricalAverageCacheImpl {
 	final private static String cacheName = "HistoricalAverageCache";
-	private static HistoricalAverageCache singleton = new HistoricalAverageCache();
+	private static HistoricalAverageCacheImpl singleton = new HistoricalAverageCacheImpl();
 	private static final Logger logger = LoggerFactory
-			.getLogger(HistoricalAverageCache.class);
+			.getLogger(HistoricalAverageCacheImpl.class);
 
 	private Cache cache = null;
 	/**
@@ -33,11 +38,11 @@ public class HistoricalAverageCache {
 	 * 
 	 * @return
 	 */
-	public static HistoricalAverageCache getInstance() {
+	public static HistoricalAverageCacheImpl getInstance() {
 		return singleton;
 	}
 	
-	private HistoricalAverageCache() {
+	private HistoricalAverageCacheImpl() {
 		CacheManager cm = CacheManager.getInstance();
 		
 		if (cm.getCache(cacheName) == null) {
@@ -76,7 +81,7 @@ public class HistoricalAverageCache {
 		List<StopPathCacheKey> keys = cache.getKeys();
 		
 		if(keys!=null)
-			logger.debug("Number of entries in HistoricalAverageCache : "+keys.size());
+			logger.debug("Number of entries in HistoricalAverageCacheImpl : "+keys.size());
 	}
 	
 	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {		
@@ -101,7 +106,7 @@ public class HistoricalAverageCache {
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
 	{
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
+		logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCacheImpl cache.");
 		
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
@@ -114,14 +119,14 @@ public class HistoricalAverageCache {
 			
 			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
 			
-			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+			HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(historicalAverageCacheKey);
 			
 			if(average==null)				
 				average=new HistoricalAverage();
 			
 			average.update(pathDuration);
 		
-			HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			HistoricalAverageCacheImpl.getInstance().putAverage(historicalAverageCacheKey, average);
 		}		
 		
 		double stopDuration=getLastStopDuration(arrivalDeparture, trip);
@@ -129,14 +134,14 @@ public class HistoricalAverageCache {
 		{
 			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
 			
-			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+			HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(historicalAverageCacheKey);
 			
 			if(average==null)				
 				average=new HistoricalAverage();
 			
 			average.update(stopDuration);
 		
-			HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			HistoricalAverageCacheImpl.getInstance().putAverage(historicalAverageCacheKey, average);
 		}
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)

@@ -12,6 +12,7 @@ import org.transitime.core.dataCache.*;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.KalmanErrorCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
+import org.transitime.core.dataCache.impl.HistoricalAverageCacheImpl;
 import org.transitime.ipc.data.*;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -101,7 +102,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex) throws RemoteException {
 		StopPathCacheKey key = new StopPathCacheKey(tripId, stopPathIndex);
 
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(key);
+		HistoricalAverage average = HistoricalAverageCacheImpl.getInstance().getAverage(key);
 		return new IpcHistoricalAverage(average);
 	}
 
@@ -131,7 +132,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys() throws RemoteException {
 		
-		List<StopPathCacheKey> keys = HistoricalAverageCache.getInstance().getKeys();
+		List<StopPathCacheKey> keys = HistoricalAverageCacheImpl.getInstance().getKeys();
 		List<IpcHistoricalAverageCacheKey> ipcResultList = new ArrayList<IpcHistoricalAverageCacheKey>();
 				
 		for(StopPathCacheKey key:keys)

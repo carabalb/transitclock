@@ -24,7 +24,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
-import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.impl.HistoricalAverageCacheImpl;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
@@ -379,7 +379,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		  StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 		
-		  HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		  HistoricalAverageCacheImpl.getInstance().putArrivalDeparture(arrivalDeparture);
 		}
 		
 		// Generate prediction accuracy info as appropriate
