@@ -2,7 +2,7 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
-import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.model.StopPathCacheKey;
 
 public class IpcHistoricalAverageCacheKey implements Serializable	
 {

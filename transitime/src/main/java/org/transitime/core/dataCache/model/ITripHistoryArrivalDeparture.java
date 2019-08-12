@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.model;
 
 import org.transitime.db.structs.IArrivalDeparture;
 

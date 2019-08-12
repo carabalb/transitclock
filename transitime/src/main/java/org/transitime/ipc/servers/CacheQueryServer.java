@@ -13,6 +13,7 @@ import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.KalmanErrorCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.impl.HistoricalAverageCacheImpl;
+import org.transitime.core.dataCache.model.*;
 import org.transitime.ipc.data.*;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.rmi.AbstractServer;

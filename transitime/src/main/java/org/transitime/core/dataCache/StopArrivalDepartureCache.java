@@ -1,6 +1,8 @@
 package org.transitime.core.dataCache;
 
 import org.hibernate.Session;
+import org.transitime.core.dataCache.model.IStopArrivalDeparture;
+import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 
 import java.util.Date;

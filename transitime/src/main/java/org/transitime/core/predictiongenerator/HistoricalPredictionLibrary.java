@@ -27,6 +27,10 @@ import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.*;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
+import org.transitime.core.dataCache.model.IStopArrivalDeparture;
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.model.TripKey;
 import org.transitime.db.structs.Block;
 import org.transitime.gtfs.DbConfig;
 

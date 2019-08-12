@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.model;
 
 import org.transitime.db.structs.*;
 import java.util.Date;
@@ -112,10 +112,10 @@ public class TripHistoryArrivalDeparture implements ITripHistoryArrivalDeparture
         return isArrival == that.isArrival &&
                 isDeparture == that.isDeparture &&
                 stopPathIndex == that.stopPathIndex &&
-                vehicleId.equals(that.vehicleId) &&
-                time.equals(that.time) &&
-                stopId.equals(that.stopId) &&
-                tripId.equals(that.tripId) &&
+                Objects.equals(vehicleId, that.vehicleId) &&
+                Objects.equals(time, that.time) &&
+                Objects.equals(stopId, that.stopId) &&
+                Objects.equals(tripId, that.tripId) &&
                 Objects.equals(blockId, that.blockId) &&
                 Objects.equals(routeId, that.routeId) &&
                 Objects.equals(scheduledTime, that.scheduledTime);

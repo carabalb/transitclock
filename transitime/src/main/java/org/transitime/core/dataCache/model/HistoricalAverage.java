@@ -1,9 +1,12 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.model;
+
+import java.io.Serializable;
+
 /**
  * @author Sean Og Crudden
  * 
  */
-public class HistoricalAverage {
+public class HistoricalAverage implements Serializable {
 	
 	@Override
 	public String toString() {

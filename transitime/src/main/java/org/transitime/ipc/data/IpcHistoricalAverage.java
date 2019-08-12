@@ -2,7 +2,7 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
-import org.transitime.core.dataCache.HistoricalAverage;
+import org.transitime.core.dataCache.model.HistoricalAverage;
 
 /**
  * @author Sean Og Crudden

@@ -13,7 +13,7 @@ import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.model.StopPathCacheKey;
 import org.transitime.core.dataCache.StopPathPredictionsCache;
 import org.transitime.db.mongo.MongoDB;
 import org.transitime.db.structs.PredictionForStopPath;

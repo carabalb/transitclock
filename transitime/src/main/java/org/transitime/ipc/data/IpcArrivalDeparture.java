@@ -5,8 +5,8 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.core.dataCache.IStopArrivalDeparture;
-import org.transitime.core.dataCache.ITripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.IStopArrivalDeparture;
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
 import org.transitime.db.structs.ArrivalDeparture;
 /**
  * For IPC for obtaining arrival and departure events for a stop that are in the cache.
