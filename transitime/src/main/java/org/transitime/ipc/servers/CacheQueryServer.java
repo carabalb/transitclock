@@ -9,6 +9,7 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.comparator.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.factory.KalmanErrorCacheFactory;
 import org.transitime.core.dataCache.factory.StopArrivalDepartureCacheFactory;
@@ -116,7 +117,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
 			
-			Collections.sort(result, new CachedArrivalDepartureComparator());
+			Collections.sort(result, new ArrivalDepartureComparator());
 			
 			for (ITripHistoryArrivalDeparture arrivalDeparture : result) {
 				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
