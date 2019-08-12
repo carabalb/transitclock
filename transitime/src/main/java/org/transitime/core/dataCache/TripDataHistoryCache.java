@@ -1,15 +1,16 @@
 package org.transitime.core.dataCache;
 
 import org.hibernate.Session;
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 public interface TripDataHistoryCache {
 
-    ITripHistoryArrivalDeparture findPreviousArrivalEvent(Set<ITripHistoryArrivalDeparture> arrivalDepartures,ITripHistoryArrivalDeparture current);
+    ITripHistoryArrivalDeparture findPreviousArrivalEvent(Set<ITripHistoryArrivalDeparture> arrivalDepartures, ITripHistoryArrivalDeparture current);
 
     @SuppressWarnings("unchecked")
     Set<ITripHistoryArrivalDeparture> getTripHistory(TripKey tripKey);
