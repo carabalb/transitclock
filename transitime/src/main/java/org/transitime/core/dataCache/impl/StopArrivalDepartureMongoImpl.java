@@ -1,7 +1,9 @@
 package org.transitime.core.dataCache.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -9,6 +11,7 @@ import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonSerializationException;
 import org.bson.Document;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -17,11 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.LongConfigValue;
 import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.model.IStopArrivalDeparture;
+import org.transitime.core.dataCache.model.StopArrivalDeparture;
+import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
 import org.transitime.db.mongo.MongoDB;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.utils.Time;
 
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,11 +36,11 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
     private static final Logger logger = LoggerFactory
             .getLogger(StopArrivalDepartureMongoImpl.class);
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private static boolean debug = false;
 
     final private static String collectionName = "arrivalDeparturesByStop";
-
-    private static final Gson gson = new Gson();
 
     private MongoCollection<Document> collection = null;
 
@@ -61,6 +66,8 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
         } catch (Exception e) {
             logger.error("Error connecting to MongoDB", e);
         }
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
     }
 
     @Override
@@ -90,11 +97,14 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
         if(result != null) {
             String arrivalDeparturesJson = result.get("arrivalDepartures").toString();
             try {
-                Type listType = new TypeToken<HashSet<StopArrivalDeparture>>() {}.getType();
-                Set<IStopArrivalDeparture> arrivalDepartures = gson.fromJson(arrivalDeparturesJson, listType);
+                Set<IStopArrivalDeparture> arrivalDepartures = objectMapper.readValue(arrivalDeparturesJson,
+                        new TypeReference<LinkedHashSet<StopArrivalDeparture>>() {});
+
+                logger.trace("Getting arrival and departure {}", key);
                 return arrivalDepartures;
             } catch (Exception e){
-                logger.error("problem",e);
+                logger.error("Unable to get ArrivalDeparture {}", key, e);
+                logger.debug(arrivalDeparturesJson);
                 return null;
             }
         } else {
@@ -122,7 +132,7 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
         StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
                 date.getTime());
 
-        Set<IStopArrivalDeparture> list = null;
+        Set<IStopArrivalDeparture> set = null;
 
         Document documentKey = new Document();
         documentKey.put("stopId", key.getStopid());
@@ -132,49 +142,63 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
         searchQuery.put("_id", documentKey);
 
         Document result = collection.find(searchQuery).first();
+
         if (result != null) {
             String arrivalDeparturesAsJson = result.get("arrivalDepartures").toString();
-            Type setType = new TypeToken<HashSet<StopArrivalDeparture>>(){}.getType();
-            list = gson.fromJson(arrivalDeparturesAsJson, setType);
-            list.add(new StopArrivalDeparture(arrivalDeparture));
-            updateData(result, list);
+            try {
+                set = objectMapper.readValue(arrivalDeparturesAsJson, new TypeReference<TreeSet<StopArrivalDeparture>>() {
+                });
+                set.add(new StopArrivalDeparture(arrivalDeparture));
+                updateData(result, set);
+            } catch(JsonProcessingException jpe) {
+                logger.error("Unable to convert ArrivalDeparture {} to JSON", key, jpe);
+            } catch (Exception e) {
+                logger.error("Unable to add ArrivalDeparture {} to StopArrivalDeparture cache", key, e);
+                logger.debug(arrivalDeparturesAsJson);
+                return null;
+            }
         } else {
-            list = new HashSet<>();
-            list.add(new StopArrivalDeparture(arrivalDeparture));
-            insertData(documentKey,list);
+            set = new LinkedHashSet<>();
+            set.add(new StopArrivalDeparture(arrivalDeparture));
+            try {
+                insertData(documentKey, set);
+            } catch (JsonProcessingException jpe) {
+                logger.error("Unable to convert ArrivalDeparture {} to JSON", key, jpe);
+            }
         }
-
         return key;
+
     }
 
-    private void insertData(Document id, Set<IStopArrivalDeparture> list){
+    private void insertData(Document id, Set<IStopArrivalDeparture> list) throws JsonProcessingException {
         Document document = new Document();
         document.put("_id", id);
         document.put("creationDate",  new Date());
 
-        String arrivalsAndDepartures = gson.toJson(list);
+        //String arrivalsAndDepartures = gson.toJson(list);
+        String arrivalsAndDepartures = objectMapper.writeValueAsString(list);
         document.put("arrivalDepartures", arrivalsAndDepartures);
 
         collection.insertOne(document);
 
-        //logger.debug("Document with trip id {} inserted successfully", document.get("tripId"));
+        logger.trace("Document with trip id {} inserted successfully", document.get("tripId"));
 
     }
 
-    private void updateData(Document document, Set<IStopArrivalDeparture> list){
-        String arrivalsAndDepartures = gson.toJson(list);
-
+    private void updateData(Document document, Set<IStopArrivalDeparture> list) throws JsonProcessingException {
+        String arrivalsAndDepartures = objectMapper.writeValueAsString(list);
+        
         Document newDocument = new Document();
         newDocument.put("arrivalDepartures", arrivalsAndDepartures);
 
         Document updateObject = new Document();
         updateObject.put("$set", newDocument);
-
-        UpdateResult result = collection.updateOne(document, updateObject);
-        if(!result.wasAcknowledged()){
-            logger.error("Document {} failed to update", document);
-        } else {
-            //logger.debug("Document with trip id {} updated successfully", document.get("tripId"));
+        try {
+            UpdateResult result = collection.updateOne(document, updateObject);
+            logger.trace("Document with trip id {} updated successfully", document.get("tripId"));
+        }catch(BsonSerializationException bse){
+            logger.error("Document {} failed to update", document, bse);
+            logger.debug("Document output: {}", newDocument);
         }
     }
 
