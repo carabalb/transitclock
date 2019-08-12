@@ -1,5 +1,6 @@
 package org.transitime.core.dataCache;
 
+import org.transitime.core.dataCache.model.StopPathCacheKey;
 import org.transitime.db.structs.PredictionForStopPath;
 
 import java.util.List;

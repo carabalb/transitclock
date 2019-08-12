@@ -1,7 +1,8 @@
 package org.transitime.core.dataCache;
 
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
+
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class CacheUtil {
