@@ -187,7 +187,7 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
     private void updateData(Document document, Set<IStopArrivalDeparture> list) throws JsonProcessingException {
         String arrivalsAndDepartures = objectMapper.writeValueAsString(list);
-        
+
         Document newDocument = new Document();
         newDocument.put("arrivalDepartures", arrivalsAndDepartures);
 
