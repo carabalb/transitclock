@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.comparator;
 
 import java.util.Comparator;
 

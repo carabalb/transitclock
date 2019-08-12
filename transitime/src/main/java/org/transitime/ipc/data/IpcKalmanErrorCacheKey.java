@@ -3,7 +3,6 @@ package org.transitime.ipc.data;
 import java.io.Serializable;
 
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
-import org.transitime.core.dataCache.StopPathCacheKey;
 
 public class IpcKalmanErrorCacheKey implements Serializable	
 {

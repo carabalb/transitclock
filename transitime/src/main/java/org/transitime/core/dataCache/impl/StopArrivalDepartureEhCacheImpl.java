@@ -8,6 +8,7 @@ import java.util.*;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.Policy;
 
 import org.hibernate.Criteria;
@@ -17,6 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.comparator.ArrivalDepartureComparator;
+import org.transitime.core.dataCache.model.IStopArrivalDeparture;
+import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.model.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.utils.Time;
 
@@ -59,10 +64,7 @@ public class StopArrivalDepartureEhCacheImpl implements StopArrivalDepartureCach
 			cm.addCache(cacheByStop);
 		}
 		cache = cm.getCache(cacheByStop);
-
-		// CacheConfiguration config = cache.getCacheConfiguration();
-
-		// cache.setMemoryStoreEvictionPolicy(evictionPolicy);
+		cache.setMemoryStoreEvictionPolicy(evictionPolicy);
 	}
 
     @Override
@@ -118,7 +120,7 @@ public class StopArrivalDepartureEhCacheImpl implements StopArrivalDepartureCach
     @SuppressWarnings("unchecked")
 	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
-		//logger.debug("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureEhCacheImpl cache.");
+		logger.trace("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureEhCacheImpl cache.");
 
 		Calendar date = Calendar.getInstance();
 		date.setTime(arrivalDeparture.getDate());
@@ -150,7 +152,7 @@ public class StopArrivalDepartureEhCacheImpl implements StopArrivalDepartureCach
 
 		// This is java 1.8 list.sort(new ArrivalDepartureComparator());
 
-		Element arrivalDepartures = new Element(key, Collections.synchronizedCollection(new HashSet<>(list)));
+		Element arrivalDepartures = new Element(key, Collections.synchronizedCollection(new LinkedHashSet(list)));
 
 		cache.put(arrivalDepartures);
 

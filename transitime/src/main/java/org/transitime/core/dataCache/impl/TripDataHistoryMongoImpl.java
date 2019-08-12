@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.LongConfigValue;
 import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.TripHistoryArrivalDeparture;
+import org.transitime.core.dataCache.model.TripKey;
 import org.transitime.db.mongo.MongoDB;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
@@ -55,14 +58,14 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
     public TripDataHistoryMongoImpl() {
         try {
             MongoDatabase db = MongoDB.getInstance().getDatabase();
-            boolean collectionExists = db.listCollectionNames()
+           boolean collectionExists = db.listCollectionNames()
                     .into(new ArrayList<String>()).contains(collectionName);
             if(!collectionExists) {
                 db.createCollection(collectionName, new CreateCollectionOptions());
                 collection = db.getCollection(collectionName);
                 collection.createIndex(Indexes.ascending("creationDate"),
                         new IndexOptions().expireAfter(cacheTTL.getValue(), TimeUnit.MINUTES));
-            }else {
+           } else {
                 collection = db.getCollection(collectionName);
             }
         } catch (Exception e) {
@@ -101,18 +104,15 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
         for(int i=0;i < days_back;i++)
         {
             Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-
             nearestDay=DateUtils.addDays(nearestDay, i*-1);
 
             DbConfig dbConfig = Core.getInstance().getDbConfig();
-
             Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
+            Integer startTime = trip != null ? trip.getStartTime() : null;
 
-            tripKey = new TripKey(arrivalDeparture.getTripId(),
-                    nearestDay,
-                    trip.getStartTime());
+            tripKey = new TripKey(arrivalDeparture.getTripId(), nearestDay,startTime);
 
-            Set<ITripHistoryArrivalDeparture> list = null;
+            Set<ITripHistoryArrivalDeparture> set = null;
 
             BasicDBObject searchQuery = new BasicDBObject();
             searchQuery.put("_id", getTripKeyHash(tripKey));
@@ -124,13 +124,13 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
             if (result != null) {
                 String arrivalDeparturesAsJson = result.get("arrivalDepartures").toString();
                 Type setType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>(){}.getType();
-                list = gson.fromJson(arrivalDeparturesAsJson, setType);
-                list.add(new TripHistoryArrivalDeparture(arrivalDeparture));
-                updateData(result, list);
+                set = gson.fromJson(arrivalDeparturesAsJson, setType);
+                set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
+                updateData(result, set);
             } else {
-                list = new HashSet<ITripHistoryArrivalDeparture>();
-                list.add(new TripHistoryArrivalDeparture(arrivalDeparture));
-                insertData(tripKey,list);
+                set = new HashSet<ITripHistoryArrivalDeparture>();
+                set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
+                insertData(tripKey,set);
             }
         }
         return tripKey;
@@ -151,7 +151,7 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
 
         collection.insertOne(document);
 
-        //logger.debug("Document with trip id {} inserted successfully", document.get("tripId"));
+        logger.trace("Document with trip id {} inserted successfully", document.get("tripId"));
     }
 
     private void updateData(Document document, Set<ITripHistoryArrivalDeparture> list){
@@ -167,7 +167,7 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
         if(!result.wasAcknowledged()){
             logger.error("Document {} failed to update", document);
         } else {
-            //logger.debug("Document with trip id {} updated successfully", document.get("tripId"));
+            logger.trace("Document with trip id {} updated successfully", document.get("tripId"));
         }
     }
 
@@ -183,6 +183,7 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
             String arrivalDeparturesJson = result.get("arrivalDepartures").toString();
             Type listType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>() {}.getType();
             Set<ITripHistoryArrivalDeparture> arrivalDepartures = gson.fromJson(arrivalDeparturesJson, listType);
+            logger.trace("Get arrival departures");
             return arrivalDepartures;
         } else {
             return null;
@@ -224,7 +225,7 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
                 results.addAll(arrivalDepartures);
             }
         }
-
+        logger.trace("Get arrival departures");
         return results;
     }
 
