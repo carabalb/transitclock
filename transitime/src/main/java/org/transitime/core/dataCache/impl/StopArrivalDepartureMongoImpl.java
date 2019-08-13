@@ -114,11 +114,11 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
     @Override
     synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
-        synchronized(insertCounter) {
-            if (insertCounter.get() % 1000 == 0) {
-                logger.debug("{} stop arrival departures added", insertCounter.get());
-            }
-            insertCounter.getAndIncrement();
+        boolean trace = false;
+
+        if(arrivalDeparture == null || arrivalDeparture.getStop() == null || arrivalDeparture.getDate() == null){
+            logger.error("Invalid arrival departure {}", arrivalDeparture);
+            return null;
         }
 
         Calendar date = Calendar.getInstance();
@@ -208,10 +208,14 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
         @SuppressWarnings("unchecked")
         List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-
+        int counter = 0;
         for(ArrivalDeparture result : results)
         {
+            if(counter % 1000 == 0){
+                logger.info("{} out of {} Stop Arrival Departure Records", counter, results.size());
+            }
             putArrivalDeparture(result);
+            counter++;
         }
     }
 }

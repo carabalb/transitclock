@@ -79,22 +79,20 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
         @SuppressWarnings("unchecked")
         List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 
+        int counter = 0;
+
         for(ArrivalDeparture result : results)
         {
+            if(counter % 1000 == 0){
+                logger.info("{} out of {} Trip Data History Records", counter, results.size());
+            }
             putArrivalDeparture(result);
+            counter++;
         }
-
-        logger.error("TripDataHistory populateCacheFromDb finished");
-
+        logger.info("TripDataHistory populateCacheFromDb finished");
     }
 
     synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
-        synchronized(insertCounter) {
-            if (insertCounter.get() % 1000 == 0) {
-                logger.debug("{} trip history arrival departures added", insertCounter.get());
-            }
-            insertCounter.getAndIncrement();
-        }
         /* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
         int days_back=1;
         if(debug)
