@@ -124,7 +124,7 @@ public class StopPathPredictionMongoImpl implements StopPathPredictionsCache {
 
         collection.insertOne(document);
 
-        //logger.debug("Document with trip id {} inserted successfully", document.get("tripId"));
+        logger.trace("Document with trip id {} inserted successfully", document.get("tripId"));
     }
 
     private void updateData(Document document, List<PredictionForStopPath> list){
@@ -140,7 +140,7 @@ public class StopPathPredictionMongoImpl implements StopPathPredictionsCache {
         if(!result.wasAcknowledged()){
             logger.error("Document {} failed to update", document);
         } else {
-            //logger.debug("Document with trip id {} updated successfully", document.get("tripId"));
+            logger.trace("Document with trip id {} updated successfully", document.get("tripId"));
         }
     }
 
@@ -148,12 +148,16 @@ public class StopPathPredictionMongoImpl implements StopPathPredictionsCache {
     public List<StopPathCacheKey> getKeys() {
         List<StopPathCacheKey> keys = new ArrayList<>();
         MongoCursor<Document> cursor = collection.find().projection(fields(include("_id"))).iterator();
-
-        while(cursor.hasNext()){
-            String tripId = (String) cursor.next().get("tripId");
-            Integer stopPathIndex = (Integer) cursor.next().get("stopPathIndex");
-            boolean travelTime = (Boolean) cursor.next().get("travelTime");
-            keys.add(new StopPathCacheKey(tripId, stopPathIndex, travelTime));
+        try {
+            while (cursor.hasNext()) {
+                String tripId = (String) cursor.next().get("tripId");
+                Integer stopPathIndex = (Integer) cursor.next().get("stopPathIndex");
+                boolean travelTime = (Boolean) cursor.next().get("travelTime");
+                keys.add(new StopPathCacheKey(tripId, stopPathIndex, travelTime));
+            }
+        } finally {
+            if(cursor != null)
+                cursor.close();
         }
         return keys;
     }

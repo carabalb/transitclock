@@ -151,11 +151,15 @@ public class KalmanErrorMongoImpl implements KalmanErrorCache {
     public List<KalmanErrorCacheKey> getKeys() {
         List<KalmanErrorCacheKey> keys = new ArrayList<>();
         MongoCursor<Document> cursor = collection.find().projection(fields(include("_id"))).iterator();
-
-        while(cursor.hasNext()){
-            String tripId = (String) cursor.next().get("tripId");
-            Integer stopPathIndex = (Integer) cursor.next().get("stopPathIndex");
-            keys.add(new KalmanErrorCacheKey(tripId, stopPathIndex));
+        try {
+            while (cursor.hasNext()) {
+                String tripId = (String) cursor.next().get("tripId");
+                Integer stopPathIndex = (Integer) cursor.next().get("stopPathIndex");
+                keys.add(new KalmanErrorCacheKey(tripId, stopPathIndex));
+            }
+        } finally {
+            if(cursor != null)
+                cursor.close();
         }
         return keys;
     }
