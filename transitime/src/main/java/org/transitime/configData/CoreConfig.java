@@ -766,5 +766,20 @@ public class CoreConfig {
 	        "transitime.core.fillHistoricalCaches",
 	        false,
 	        "whether historical caches should be filled on Core start.");
+
+	/**
+	 * Whether historical arrival/departure caches should be filled on
+	 * Core start. These are used for some prediction generators, but
+	 * not the default.
+	 * @return
+	 */
+	public static boolean getTrackHistoricalCache() {
+		return fillHistoricalCaches.getValue();
+	}
+	private static BooleanConfigValue trackHistoricalCaches =
+			new BooleanConfigValue(
+					"transitime.core.trackHistoricalCaches",
+					false,
+					"whether historical caches should be tracked to avoid refilling caches that have already been processed.");
 	
 }

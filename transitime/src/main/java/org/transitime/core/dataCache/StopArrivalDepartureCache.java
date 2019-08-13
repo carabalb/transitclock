@@ -20,4 +20,8 @@ public interface StopArrivalDepartureCache {
     StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture);
 
     void populateCacheFromDb(Session session, Date startDate, Date endDate);
+
+    boolean isCacheForDateProcessed(Date startDate, Date endDate);
+
+    void saveCacheHistoryRecord(Date startDate, Date endDate);
 }

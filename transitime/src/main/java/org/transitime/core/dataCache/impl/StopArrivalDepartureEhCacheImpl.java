@@ -175,6 +175,18 @@ public class StopArrivalDepartureEhCacheImpl implements StopArrivalDepartureCach
 		}
 	}
 
+    @Override
+    public boolean isCacheForDateProcessed(Date startDate, Date endDate){
+        logger.debug("isCacheForDateProcessed not implemented");
+        return false;
+    }
+
+    @Override
+    public void saveCacheHistoryRecord(Date startDate, Date endDate) {
+        logger.debug("saveCacheHistory not implemented");
+        return;
+    }
+
 	/**
 	 * This policy evicts arrival departures from the cache when they are X
 	 * (age) number of milliseconds old

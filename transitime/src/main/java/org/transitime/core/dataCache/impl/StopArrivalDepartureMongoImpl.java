@@ -218,4 +218,16 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
             counter++;
         }
     }
+
+    @Override
+    public boolean isCacheForDateProcessed(Date startDate, Date endDate){
+        return HistoricalCacheService.getInstance().isCacheForDateProcessed(CacheType.STOP_ARRIVAL_DEPARTURE, startDate, endDate);
+    }
+
+    @Override
+    public void saveCacheHistoryRecord(Date startDate, Date endDate) {
+        HistoricalCacheService.getInstance().save(CacheType.STOP_ARRIVAL_DEPARTURE, startDate, endDate);
+    }
+
+    }
 }

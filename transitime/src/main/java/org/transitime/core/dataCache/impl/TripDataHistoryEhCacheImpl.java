@@ -257,6 +257,18 @@ public class TripDataHistoryEhCacheImpl implements TripDataHistoryCache {
 		return cache.getKeys();
 	}
 
+	@Override
+	public boolean isCacheForDateProcessed(Date startDate, Date endDate){
+		logger.debug("isCacheForDateProcessed not implemented");
+		return false;
+	}
+
+	@Override
+	public void saveCacheHistoryRecord(Date startDate, Date endDate) {
+		logger.debug("saveCacheHistory not implemented");
+		return;
+	}
+
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}

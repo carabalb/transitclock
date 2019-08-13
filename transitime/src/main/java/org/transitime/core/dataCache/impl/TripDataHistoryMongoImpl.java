@@ -239,8 +239,14 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
         return tripKey.getTripId() + "_" + tripKey.getStartTime() + "_" + tripKey.getTripStartDate().getTime();
     }
 
-    @PreDestroy
-    public void destroy(){
-
+    @Override
+    public boolean isCacheForDateProcessed(Date startDate, Date endDate){
+        return HistoricalCacheService.getInstance().isCacheForDateProcessed(CacheType.TRIP_DATA_HISTORY, startDate, endDate);
     }
+
+    @Override
+    public void saveCacheHistoryRecord(Date startDate, Date endDate){
+        HistoricalCacheService.getInstance().save(CacheType.TRIP_DATA_HISTORY, startDate, endDate);
+    }
+
 }

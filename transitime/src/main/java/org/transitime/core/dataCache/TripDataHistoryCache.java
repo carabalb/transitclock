@@ -23,4 +23,8 @@ public interface TripDataHistoryCache {
     ITripHistoryArrivalDeparture findPreviousDepartureEvent(Set<ITripHistoryArrivalDeparture> arrivalDepartures, ITripHistoryArrivalDeparture current);
 
     Set<ITripHistoryArrivalDeparture> getTripHistory(String tripId, Date date, Integer starttime);
+
+    boolean isCacheForDateProcessed(Date startDate, Date endDate);
+
+    void saveCacheHistoryRecord(Date startDate, Date endDate);
 }
