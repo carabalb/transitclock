@@ -25,6 +25,7 @@ import org.transitime.core.dataCache.model.StopArrivalDeparture;
 import org.transitime.core.dataCache.model.StopArrivalDepartureCacheKey;
 import org.transitime.db.mongo.MongoDB;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.Stop;
 import org.transitime.utils.Time;
 
 import java.util.*;
@@ -136,18 +137,17 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
         Document documentKey = new Document();
         documentKey.put("stopId", key.getStopid());
-        documentKey.put("date", key.getDate());
+        documentKey.put("date", key.getDate().getTime());
 
         BasicDBObject searchQuery = new BasicDBObject();
-        searchQuery.put("_id", documentKey);
+        searchQuery.put("_id", getKeyHash(key.getStopid(), key.getDate().getTime()) );
 
         Document result = collection.find(searchQuery).first();
 
         if (result != null) {
             String arrivalDeparturesAsJson = result.get("arrivalDepartures").toString();
             try {
-                set = objectMapper.readValue(arrivalDeparturesAsJson, new TypeReference<TreeSet<StopArrivalDeparture>>() {
-                });
+                set = objectMapper.readValue(arrivalDeparturesAsJson, new TypeReference<TreeSet<StopArrivalDeparture>>() {});
                 set.add(new StopArrivalDeparture(arrivalDeparture));
                 updateData(result, set);
             } catch(JsonProcessingException jpe) {
@@ -167,20 +167,19 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
             }
         }
         return key;
-
     }
 
     private void insertData(Document id, Set<IStopArrivalDeparture> list) throws JsonProcessingException {
         Document document = new Document();
-        document.put("_id", id);
+        String stopId = (String)id.get("stopId");
+        Long date = (Long)id.get("date");
+        document.put("_id", getKeyHash(stopId, date));
         document.put("creationDate",  new Date());
 
-        //String arrivalsAndDepartures = gson.toJson(list);
         String arrivalsAndDepartures = objectMapper.writeValueAsString(list);
         document.put("arrivalDepartures", arrivalsAndDepartures);
 
         collection.insertOne(document);
-
         logger.trace("Document with trip id {} inserted successfully", document.get("tripId"));
 
     }
@@ -229,5 +228,8 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
         HistoricalCacheService.getInstance().save(CacheType.STOP_ARRIVAL_DEPARTURE, startDate, endDate);
     }
 
+    private String getKeyHash(String stopId, Long time){
+
+        return stopId + "_" + time;
     }
 }
