@@ -379,33 +379,44 @@ public class Core {
 	
 	private static void fillHistoricalCaches() {
 	    Session session = HibernateUtils.getSession();
-    
+
         Date endDate=Calendar.getInstance().getTime();
-        /* populate one day at a time to avoid memory issue */
+		Date initialEndDate = new Date(endDate.getTime());
+
+		/* populate one day at a time to avoid memory issue */
         for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
         {
           Date startDate=DateUtils.addDays(endDate, -1);
 
-          logger.info("Populating TripDataHistory cache for period {} to {}",startDate,endDate);
-          TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-          logger.info("Finished populating TripDataHistory cache for period {} to {}",startDate,endDate);
-
+          if(TripDataHistoryCacheFactory.getInstance().isCacheForDateProcessed(startDate, endDate)){
+              logger.info("Cache for start date {} - end date {} has already been processed, skipping", startDate, endDate);
+          } else {
+              logger.info("Populating TripDataHistory cache for period {} to {}", startDate, endDate);
+              TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+              logger.info("Finished populating TripDataHistory cache for period {} to {}", startDate, endDate);
+          }
           endDate=startDate;
         }
+		TripDataHistoryCacheFactory.getInstance().saveCacheHistoryRecord(endDate, initialEndDate);
 
         endDate=Calendar.getInstance().getTime();
+		initialEndDate = new Date(endDate.getTime());
 
         /* populate one day at a time to avoid memory issue */
         for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
         {
           Date startDate=DateUtils.addDays(endDate, -1);
 
-          logger.info("Populating StopArrivalDeparture cache for period {} to {}",startDate,endDate);
-          StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-          logger.info("Finished populating StopArrivalDeparture cache for period {} to {}",startDate,endDate);
-
+          if(StopArrivalDepartureCacheFactory.getInstance().isCacheForDateProcessed(startDate,endDate)){
+            logger.info("Cache for start date {} and end date {} has already been processed, skipping", startDate, endDate);
+          } else {
+            logger.info("Populating StopArrivalDeparture cache for period {} to {}", startDate, endDate);
+            StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+            logger.info("Finished populating StopArrivalDeparture cache for period {} to {}", startDate, endDate);
+          }
           endDate=startDate;
         }
+		StopArrivalDepartureCacheFactory.getInstance().saveCacheHistoryRecord(endDate, initialEndDate);
 	}
 	
 	
