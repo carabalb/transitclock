@@ -39,7 +39,7 @@ public class BlockCacheEhCacheImpl implements BlockCache {
         return singleton;
     }
 
-    public BlockCacheEhCacheImpl() {
+    private BlockCacheEhCacheImpl() {
         CacheManager cm = CacheManager.getInstance();
 
         if (cm.getCache(cacheName) == null) {

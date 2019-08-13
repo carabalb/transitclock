@@ -39,12 +39,12 @@ public class MongoDB {
             String host = MongoDbSetupConfig.getMongoHost();
             String databaseName = MongoDbSetupConfig.getMongoDbName();
             Integer port = MongoDbSetupConfig.getMongoPort();
-            boolean sslEnabled = MongoDbSetupConfig.getMongoSslEnabled();
-            boolean sslInvalidHostNameAllowed = MongoDbSetupConfig.getInvalidHostnameAllowed();
+            boolean isSSLEnabled = MongoDbSetupConfig.getMongoSslEnabled();
+            boolean isSSLInvalidHostNameAllowed = MongoDbSetupConfig.getInvalidHostnameAllowed();
 
             MongoClientOptions options = MongoClientOptions.builder()
-                                            .sslEnabled(sslEnabled)
-                                            .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                                            .sslEnabled(isSSLEnabled)
+                                            .sslInvalidHostNameAllowed(isSSLInvalidHostNameAllowed)
                                             .build();
 
             ServerAddress mongoServerAddress = new ServerAddress(host, port);

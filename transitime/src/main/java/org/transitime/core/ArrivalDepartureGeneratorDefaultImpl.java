@@ -368,10 +368,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 								
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
 		arrivalDeparture.logCreation();
-		
-		
-		/*protected ArrivalDeparture(arrivalDeparture., String vehicleId, Date time, Date avlTime, Block block, 
-				int tripIndex, int stopPathIndex, boolean isArrival) {*/
+
 		
 		if (CoreConfig.getFillHistoricalCaches()) {
 
