@@ -101,34 +101,41 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
 
         for(int i=0;i < days_back;i++)
         {
-            Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-            nearestDay=DateUtils.addDays(nearestDay, i*-1);
+            try {
+                Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
+                nearestDay = DateUtils.addDays(nearestDay, i * -1);
 
-            DbConfig dbConfig = Core.getInstance().getDbConfig();
-            Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-            Integer startTime = trip != null ? trip.getStartTime() : null;
+                DbConfig dbConfig = Core.getInstance().getDbConfig();
+                Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+                Integer startTime = trip != null ? trip.getStartTime() : null;
 
-            tripKey = new TripKey(arrivalDeparture.getTripId(), nearestDay,startTime);
+                tripKey = new TripKey(arrivalDeparture.getTripId(), nearestDay, startTime);
 
-            Set<ITripHistoryArrivalDeparture> set = null;
+                Set<ITripHistoryArrivalDeparture> set = null;
 
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put("_id", getTripKeyHash(tripKey));
-            searchQuery.put("tripId", tripKey.getTripId());
-            searchQuery.put("startTime", tripKey.getStartTime());
-            searchQuery.put("startDate", tripKey.getTripStartDate());
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("_id", getTripKeyHash(tripKey));
+                searchQuery.put("tripId", tripKey.getTripId());
+                searchQuery.put("startTime", tripKey.getStartTime());
+                searchQuery.put("startDate", tripKey.getTripStartDate());
 
-            Document result = collection.find(searchQuery).first();
-            if (result != null) {
-                String arrivalDeparturesAsJson = result.get("arrivalDepartures").toString();
-                Type setType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>(){}.getType();
-                set = gson.fromJson(arrivalDeparturesAsJson, setType);
-                set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
-                updateData(result, set);
-            } else {
-                set = new HashSet<ITripHistoryArrivalDeparture>();
-                set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
-                insertData(tripKey,set);
+                Document result = collection.find(searchQuery).first();
+                if (result != null) {
+                    String arrivalDeparturesAsJson = result.get("arrivalDepartures").toString();
+                    Type setType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>() {
+                    }.getType();
+                    set = gson.fromJson(arrivalDeparturesAsJson, setType);
+                    set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
+                    updateData(result, set);
+                } else {
+                    set = new HashSet<ITripHistoryArrivalDeparture>();
+                    set.add(new TripHistoryArrivalDeparture(arrivalDeparture));
+                    insertData(tripKey, set);
+                }
+            } catch (Exception e) {
+                logger.error("Unable to add arrival departure, skipping");
+                logger.debug(arrivalDeparture.toString());
+                continue;
             }
         }
         return tripKey;
@@ -137,7 +144,6 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
 
     private void insertData(TripKey tripKey, Set<ITripHistoryArrivalDeparture> list){
         Document document = new Document();
-
         document.put("_id", getTripKeyHash(tripKey));
         document.put("tripId", tripKey.getTripId());
         document.put("startTime", tripKey.getStartTime());
@@ -195,33 +201,34 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
 
         Set<ITripHistoryArrivalDeparture> results = new HashSet<>();
         MongoCursor<Document> cursor = null;
+        try {
+            if (tripId != null && date != null && starttime == null) {
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("tripId", tripId);
+                searchQuery.put("date", date);
+                cursor = collection.find(searchQuery).iterator();
 
-        if(tripId!=null && date!=null && starttime==null)
-        {
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put("tripId", tripId);
-            searchQuery.put("date", date);
-            cursor = collection.find(searchQuery).iterator();
-
-        }else if(tripId!=null && date==null && starttime==null)
-        {
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put("tripId", tripId);
-            cursor = collection.find(searchQuery).iterator();
-        }
-        else if(tripId==null && date!=null && starttime==null)
-        {
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put("date", date);
-            cursor = collection.find(searchQuery).iterator();
-        }
-
-        if(cursor != null) {
-            Type listType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>() {}.getType();
-            while (cursor.hasNext()) {
-                Set<ITripHistoryArrivalDeparture> arrivalDepartures = gson.fromJson(cursor.next().get("arrivalDepartures").toString(), listType);
-                results.addAll(arrivalDepartures);
+            } else if (tripId != null && date == null && starttime == null) {
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("tripId", tripId);
+                cursor = collection.find(searchQuery).iterator();
+            } else if (tripId == null && date != null && starttime == null) {
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("date", date);
+                cursor = collection.find(searchQuery).iterator();
             }
+
+            if (cursor != null) {
+                Type listType = new TypeToken<HashSet<TripHistoryArrivalDeparture>>() {
+                }.getType();
+                while (cursor.hasNext()) {
+                    Set<ITripHistoryArrivalDeparture> arrivalDepartures = gson.fromJson(cursor.next().get("arrivalDepartures").toString(), listType);
+                    results.addAll(arrivalDepartures);
+                }
+            }
+        } finally {
+            if(cursor != null)
+                cursor.close();
         }
         logger.trace("Get arrival departures");
         return results;
