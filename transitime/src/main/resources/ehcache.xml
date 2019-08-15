@@ -48,4 +48,11 @@
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>	
+	<cache name="blockCache"
+		   maxEntriesLocalHeap="100000"
+		   maxEntriesLocalDisk="100000"
+		   eternal="true"
+		   diskSpoolBufferSizeMB="50"
+		   transactionalMode="off">
+	</cache>
 </ehcache>

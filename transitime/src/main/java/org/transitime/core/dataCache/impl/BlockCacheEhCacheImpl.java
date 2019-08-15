@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class BlockCacheEhCacheImpl implements BlockCache {
 
-    final private static String cacheName = "BlockCache";
+    final private static String cacheName = "blockCache";
     private static final Logger logger = LoggerFactory
             .getLogger(BlockCacheEhCacheImpl.class);
 
