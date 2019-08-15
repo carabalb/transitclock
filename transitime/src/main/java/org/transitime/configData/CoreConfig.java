@@ -774,7 +774,7 @@ public class CoreConfig {
 	 * @return
 	 */
 	public static boolean getTrackHistoricalCache() {
-		return fillHistoricalCaches.getValue();
+		return trackHistoricalCaches.getValue();
 	}
 	private static BooleanConfigValue trackHistoricalCaches =
 			new BooleanConfigValue(
