@@ -159,8 +159,8 @@ public class HistoricalPredictionLibrary {
 	private static IStopArrivalDeparture findMatchInList(Set<IStopArrivalDeparture> nextStopList,
 														 IStopArrivalDeparture currentArrivalDeparture) {
 		for (IStopArrivalDeparture nextStopArrivalDeparture : nextStopList) {
-			if (currentArrivalDeparture.getVehicleId() == nextStopArrivalDeparture.getVehicleId()
-					&& currentArrivalDeparture.getTripId() == nextStopArrivalDeparture.getTripId()
+			if (currentArrivalDeparture.getVehicleId().equals(nextStopArrivalDeparture.getVehicleId())
+					&& currentArrivalDeparture.getTripId().equals(nextStopArrivalDeparture.getTripId())
 					&&  currentArrivalDeparture.isDeparture() && nextStopArrivalDeparture.isArrival() ) {
 				return nextStopArrivalDeparture;
 			}
