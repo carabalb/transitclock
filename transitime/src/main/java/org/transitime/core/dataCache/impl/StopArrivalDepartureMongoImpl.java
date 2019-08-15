@@ -78,39 +78,39 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
     @Override
     synchronized public Set<IStopArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
-        Calendar date = Calendar.getInstance();
-        date.setTime(key.getDate());
 
-        date.set(Calendar.HOUR_OF_DAY, 0);
-        date.set(Calendar.MINUTE, 0);
-        date.set(Calendar.SECOND, 0);
-        date.set(Calendar.MILLISECOND, 0);
+        if(key.getStopid() != null && key.getDate() != null){
+            Calendar date = Calendar.getInstance();
+            date.setTime(key.getDate());
 
-        Document documentKey = new Document();
-        documentKey.put("stopId", key.getStopid());
-        documentKey.put("date", date.getTime());
+            date.set(Calendar.HOUR_OF_DAY, 0);
+            date.set(Calendar.MINUTE, 0);
+            date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
 
-        BasicDBObject searchQuery = new BasicDBObject();
-        searchQuery.put("_id", documentKey);
+            BasicDBObject searchQuery = new BasicDBObject();
+            searchQuery.put("_id", getKeyHash(key.getStopid(), date.getTime().getTime()));
 
-        Document result = collection.find(searchQuery).first();
+            Document result = collection.find(searchQuery).first();
 
-        if(result != null) {
-            String arrivalDeparturesJson = result.get("arrivalDepartures").toString();
-            try {
-                Set<IStopArrivalDeparture> arrivalDepartures = objectMapper.readValue(arrivalDeparturesJson,
-                        new TypeReference<LinkedHashSet<StopArrivalDeparture>>() {});
+            if(result != null) {
+                String arrivalDeparturesJson = result.get("arrivalDepartures").toString();
+                try {
+                    Set<IStopArrivalDeparture> arrivalDepartures = objectMapper.readValue(arrivalDeparturesJson,
+                            new TypeReference<LinkedHashSet<StopArrivalDeparture>>() {});
 
-                logger.trace("Getting arrival and departure {}", key);
-                return arrivalDepartures;
-            } catch (Exception e){
-                logger.error("Unable to get ArrivalDeparture {}", key, e);
-                logger.debug(arrivalDeparturesJson);
-                return null;
+                    logger.trace("Getting arrival and departure {}", key);
+                    return arrivalDepartures;
+                } catch (Exception e){
+                    logger.error("Unable to get ArrivalDeparture {}", key, e);
+                    logger.debug(arrivalDeparturesJson);
+                    return null;
+                }
             }
-        } else {
-            return null;
         }
+
+        return null;
+
     }
 
     @Override
