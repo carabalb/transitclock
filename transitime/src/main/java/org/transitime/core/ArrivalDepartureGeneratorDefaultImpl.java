@@ -370,7 +370,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		arrivalDeparture.logCreation();
 
 		
-		if (CoreConfig.getFillHistoricalCaches()) {
+		if (CoreConfig.getFillHistoricalCachesForGenerators()) {
 
 		  TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 		

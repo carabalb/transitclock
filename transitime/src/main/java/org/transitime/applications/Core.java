@@ -287,7 +287,7 @@ public class Core {
 	/**
 	 * For setting the system time when in playback or batch mode.
 	 * 
-	 * @param systemTime
+	 * @param systemEpochTime
 	 */
 	public void setSystemTime(long systemEpochTime) {
 		this.systemTime = new SettableSystemTime(systemEpochTime);
@@ -449,7 +449,7 @@ public class Core {
 			// Initialize the core now
 			createCore();
 			
-			if (CoreConfig.getFillHistoricalCaches())
+			if (CoreConfig.getFillHistoricalCachesOnStart())
 			  fillHistoricalCaches();
 			
 			// Start any optional modules. 

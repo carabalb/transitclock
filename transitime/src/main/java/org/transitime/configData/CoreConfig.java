@@ -754,18 +754,31 @@ public class CoreConfig {
 	
 	/**
 	 * Whether historical arrival/departure caches should be filled on
-	 * Core start. These are used for some prediction generators, but
-	 * not the default.
+	 * Core start.
 	 * @return
 	 */
-	public static boolean getFillHistoricalCaches() {
-	  return fillHistoricalCaches.getValue();
+	public static boolean getFillHistoricalCachesOnStart() {
+	  return fillHistoricalCachesOnStart.getValue();
 	}
-	private static BooleanConfigValue fillHistoricalCaches = 
+	private static BooleanConfigValue fillHistoricalCachesOnStart =
 	    new BooleanConfigValue(
-	        "transitime.core.fillHistoricalCaches",
+	        "transitime.core.fillHistoricalCachesOnStart",
 	        false,
 	        "whether historical caches should be filled on Core start.");
+
+	/**
+	 * Whether historical arrival/departure caches should be filled
+	 * for prediction generators.
+	 * @return
+	 */
+	public static boolean getFillHistoricalCachesForGenerators() {
+		return fillHistoricalCachesForGenerators.getValue();
+	}
+	private static BooleanConfigValue fillHistoricalCachesForGenerators =
+			new BooleanConfigValue(
+					"transitime.core.fillHistoricalCachesForGenerators",
+					false,
+					"whether historical caches should be filled for prediction generators while running.");
 
 	/**
 	 * Whether historical arrival/departure caches should be filled on
