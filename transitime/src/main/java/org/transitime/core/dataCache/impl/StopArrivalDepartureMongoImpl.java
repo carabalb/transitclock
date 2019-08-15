@@ -203,18 +203,29 @@ public class StopArrivalDepartureMongoImpl implements StopArrivalDepartureCache 
 
     @Override
     public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
-        Criteria criteria =session.createCriteria(ArrivalDeparture.class);
+        if(isCacheForDateProcessed(startDate, endDate)){
+            logger.info("StopArrivalDeparture cache for start date {} - end date {} has already been processed, skipping", startDate, endDate);
+            return;
+        } else {
+            Date actualStartDate = HistoricalCacheService.getInstance().getStartTime(CacheType.STOP_ARRIVAL_DEPARTURE, startDate.getTime(), endDate.getTime());
+            logger.info("Populating TripDataHistory cache for period {} to {}", endDate, actualStartDate);
 
-        @SuppressWarnings("unchecked")
-        List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-        int counter = 0;
-        for(ArrivalDeparture result : results)
-        {
-            if(counter % 1000 == 0){
-                logger.info("{} out of {} Stop Arrival Departure Records", counter, results.size());
+            Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+
+            @SuppressWarnings("unchecked")
+            List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", actualStartDate, endDate)).list();
+            int counter = 0;
+            for (ArrivalDeparture result : results) {
+                if (counter % 1000 == 0) {
+                    logger.info("{} out of {} Stop Arrival Departure Records ({}%)", counter, results.size(), (int) ((counter * 100.0f) / results.size()));
+                }
+                putArrivalDeparture(result);
+                counter++;
             }
-            putArrivalDeparture(result);
-            counter++;
+            if(!startDate.equals(actualStartDate)){
+                logger.info("Only populating subset of StopArrivalDeparture cache from {} to {} since the rest has already been cached", endDate, actualStartDate);
+            }
+            logger.info("Finished populating StopArrivalDeparture cache for period {} to {}", endDate, actualStartDate );
         }
     }
 

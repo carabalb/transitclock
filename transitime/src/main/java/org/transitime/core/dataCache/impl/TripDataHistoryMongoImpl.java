@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.LongConfigValue;
 import org.transitime.core.dataCache.*;
+import org.transitime.core.dataCache.factory.TripDataHistoryCacheFactory;
 import org.transitime.core.dataCache.model.ITripHistoryArrivalDeparture;
 import org.transitime.core.dataCache.model.TripHistoryArrivalDeparture;
 import org.transitime.core.dataCache.model.TripKey;
@@ -74,22 +75,35 @@ public class TripDataHistoryMongoImpl implements TripDataHistoryCache {
     }
 
     public void populateCacheFromDb(Session session, Date startDate, Date endDate) {
-        Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 
-        @SuppressWarnings("unchecked")
-        List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
+        if(isCacheForDateProcessed(startDate, endDate)){
+            logger.info("TripDataHistory cache for start date {} - end date {} has already been processed, skipping", startDate, endDate);
+            return;
+        } else {
+            Date actualStartDate = HistoricalCacheService.getInstance().getStartTime(CacheType.TRIP_DATA_HISTORY, startDate.getTime(), endDate.getTime());
+            logger.info("Populating TripDataHistory cache for period {} to {}", endDate, actualStartDate);
 
-        int counter = 0;
+            Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 
-        for(ArrivalDeparture result : results)
-        {
-            if(counter % 1000 == 0){
-                logger.info("{} out of {} Trip Data History Records", counter, results.size());
+            @SuppressWarnings("unchecked")
+            List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", actualStartDate, endDate)).list();
+
+            int counter = 0;
+
+            for(ArrivalDeparture result : results)
+            {
+                if(counter % 1000 == 0){
+                    logger.info("{} out of {} Trip Data History Records({}%)", counter, results.size(), (int)((counter * 100.0f) / results.size()));
+                }
+                putArrivalDeparture(result);
+                counter++;
             }
-            putArrivalDeparture(result);
-            counter++;
+            if(!startDate.equals(actualStartDate)){
+                logger.info("Only populating subset of TripDataHistory cache from {} to {} since the rest has already been cached", endDate, actualStartDate);
+            }
+            logger.info("Finished populating TripDataHistory cache for period {} to {}", endDate, startDate);
+
         }
-        logger.info("TripDataHistory populateCacheFromDb finished");
     }
 
     synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {

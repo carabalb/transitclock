@@ -387,35 +387,21 @@ public class Core {
         for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
         {
           Date startDate=DateUtils.addDays(endDate, -1);
-
-          if(TripDataHistoryCacheFactory.getInstance().isCacheForDateProcessed(startDate, endDate)){
-              logger.info("Cache for start date {} - end date {} has already been processed, skipping", startDate, endDate);
-          } else {
-              logger.info("Populating TripDataHistory cache for period {} to {}", startDate, endDate);
-              TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-              logger.info("Finished populating TripDataHistory cache for period {} to {}", startDate, endDate);
-          }
+          TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
           endDate=startDate;
         }
-		TripDataHistoryCacheFactory.getInstance().saveCacheHistoryRecord(endDate, initialEndDate);
+	  	TripDataHistoryCacheFactory.getInstance().saveCacheHistoryRecord(endDate, initialEndDate);
 
-        endDate=Calendar.getInstance().getTime();
+		endDate=Calendar.getInstance().getTime();
 		initialEndDate = new Date(endDate.getTime());
 
         /* populate one day at a time to avoid memory issue */
         for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
         {
-          Date startDate=DateUtils.addDays(endDate, -1);
-
-          if(StopArrivalDepartureCacheFactory.getInstance().isCacheForDateProcessed(startDate,endDate)){
-            logger.info("Cache for start date {} and end date {} has already been processed, skipping", startDate, endDate);
-          } else {
-            logger.info("Populating StopArrivalDeparture cache for period {} to {}", startDate, endDate);
+          	Date startDate=DateUtils.addDays(endDate, -1);
             StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-            logger.info("Finished populating StopArrivalDeparture cache for period {} to {}", startDate, endDate);
-          }
-          endDate=startDate;
-        }
+			endDate=startDate;
+		}
 		StopArrivalDepartureCacheFactory.getInstance().saveCacheHistoryRecord(endDate, initialEndDate);
 	}
 	

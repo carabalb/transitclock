@@ -59,12 +59,9 @@ public class HistoricalCacheService {
             return;
         }
 
-        Document query = new Document();
-        query.append("_id", cacheType.getValue());
-        Document result = collection.find(query).first();
+        Document result = getCacheHistoryRecord(cacheType);
 
         try {
-
             if (result != null) {
                 Document updateDocument = new Document();
                 updateDocument.put("startTime", startDate.getTime());
@@ -84,7 +81,7 @@ public class HistoricalCacheService {
 
                 collection.insertOne(document);
             }
-            logger.debug("saved cache history record for cache type {} with start date {} and end date {}", cacheType.getValue(), startDate, endDate);
+            logger.debug("Saved cache history record for cache type {} with start time {} and end time {}", cacheType.getValue(), startDate, endDate);
         } catch (Exception e){
             logger.error("unable to save cache record", e);
         }
@@ -107,5 +104,23 @@ public class HistoricalCacheService {
         } else {
             return false;
         }
+    }
+
+    public Date getStartTime(CacheType cacheType, Long newStartTime, Long newEndTime){
+        Document result = getCacheHistoryRecord(cacheType);
+        if(trackHistoricalCaches &&result != null){
+            Long origStartTime = (Long) result.get("startTime");
+            Long origEndTime = (Long) result.get("endTime");
+            if(newStartTime < origEndTime && newEndTime > origEndTime && newStartTime> origStartTime){
+                return new Date(origEndTime);
+            }
+        }
+        return new Date(newStartTime);
+    }
+
+    private Document getCacheHistoryRecord(CacheType cacheType){
+        Document query = new Document();
+        query.append("_id", cacheType.getValue());
+        return collection.find(query).first();
     }
 }
