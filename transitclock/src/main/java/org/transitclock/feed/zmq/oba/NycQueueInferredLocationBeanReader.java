@@ -7,13 +7,12 @@ import org.onebusaway.nyc.transit_data.model.NycQueuedInferredLocationBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.avl.ZeroMQAvlModule;
-import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.feed.zmq.ZmqQueueBeanReader;
+import org.transitclock.utils.RouteFilterUtils;
 import org.transitclock.utils.MathUtils;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -36,30 +35,13 @@ public class NycQueueInferredLocationBeanReader implements ZmqQueueBeanReader {
     private int avlReportProcessedCount = 0;
     private static final int COUNT_INTERVAL = 10000;
 
-    public static StringConfigValue zeromqRouteFilter =
-            new StringConfigValue("transitclock.avl.zeromq.allowedRoutes",
-                    "*",
-                    "List of acceptable routes for incoming avl data. Defaults to * which allows all.");
-
-    private static Set<String> routeFilterList = new HashSet<>();
+    private Set<String> routeFilterSet;
 
     public NycQueueInferredLocationBeanReader(){
-        initializeRouteFilter();
+        routeFilterSet = RouteFilterUtils.getFilteredRoutes();
     }
 
     /********************** Member Functions **************************/
-
-    private void initializeRouteFilter(){
-        try {
-            String[] routesToFilter = zeromqRouteFilter.getValue().split("(;|,| +)");
-            for(String routeToFilter: routesToFilter){
-                routeFilterList.add(routeToFilter.toUpperCase());
-            }
-        }catch (Exception e){
-            routeFilterList.clear();
-            routeFilterList.add("*");
-        }
-    }
 
 
     @Override
@@ -69,7 +51,7 @@ public class NycQueueInferredLocationBeanReader implements ZmqQueueBeanReader {
         processedCount++;
 
         // Check for data issues and/or filter out data
-        if(!acceptableResult(inferredLocationBean)){
+        if(!hasValidRoute(inferredLocationBean)){
             logCounts(topic);
             return null;
         } else {
@@ -94,23 +76,19 @@ public class NycQueueInferredLocationBeanReader implements ZmqQueueBeanReader {
         }
     }
 
-    private boolean acceptableResult(NycQueuedInferredLocationBean inferredLocationBean){
-        String routeId = inferredLocationBean.getInferredRouteId();
-
-        if(routeId == null || routeFilterList.isEmpty() || (routeFilterList.size() > 0 && routeFilterList.contains("*")))
-            return true;
+    private boolean hasValidRoute(NycQueuedInferredLocationBean inferredLocationBean){
+        String inferredRouteId = inferredLocationBean.getInferredRouteId();
+        String routeId = AgencyAndId.convertFromString(inferredRouteId).getId().toUpperCase();
         try {
-            String route = AgencyAndId.convertFromString(routeId).getId().toUpperCase();
-            if (routeFilterList.contains(route)) {
+            if (RouteFilterUtils.hasValidRoute(routeFilterSet,routeId)) {
                 return true;
             } else {
-                logger.debug("NycQueuedInferredLocationBean {} not filtered", inferredLocationBean);
-                return false;
+                logger.debug("NycQueuedInferredLocationBean with route {} not allowed", routeId);
             }
-        } catch (Exception e){
+        } catch(Exception e){
             logger.error("Error processing NycQueuedInferredLocationBean {}", inferredLocationBean, e);
-            return false;
         }
+        return false;
     }
 
     private AvlReport convertInferredLocationBeanToAvlReport(NycQueuedInferredLocationBean inferredLocationBean){

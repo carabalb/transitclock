@@ -34,12 +34,10 @@ import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.utils.RouteFilterUtils;
 
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Reads in external prediction data from a GTFS realtime trip updates feed and
@@ -68,7 +66,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	
   // if stopIds needs optional parsing/translation
   private GTFSRealtimeTranslator translator = null;
-  
+
+  private Set<String> routeFilterSet = new HashSet<>();
 
 	/**
 	 * @return the gtfstripupdateurl
@@ -84,6 +83,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	 */
 	public GTFSRealtimePredictionAccuracyModule(String agencyId) {
 		super(agencyId);
+		routeFilterSet = RouteFilterUtils.getFilteredRoutes();
 	}
 
 	/**
@@ -162,6 +162,20 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 							if (tripDescriptor != null) {
 								String tripId = getTripId(dbConfig, tripDescriptor);
+
+								if(tripDescriptor.hasRouteId()){
+									String routeId = tripDescriptor.getRouteId();
+									try {
+										if (!RouteFilterUtils.hasValidRoute(routeFilterSet, tripDescriptor.getRouteId())) {
+											logger.debug("Entity with route {} not allowed", routeId);
+											continue;
+										}
+									} catch(Exception e){
+										logger.error("Error filtering route {} for Enity {} with tripId {}", routeId, tripDescriptor.getTripId(), e);
+										continue;
+									}
+								}
+
 								logger.debug("Trip Descriptor: {}", tripDescriptor);
 
 								gtfsTrip = dbConfig.getTrip(tripId);
@@ -446,6 +460,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 			}
 		}
 	}
+
 
 	private String getTripId(DbConfig config, GtfsRealtime.TripDescriptor tripDescriptor) {
 		String tripId = tripDescriptor.getTripId();

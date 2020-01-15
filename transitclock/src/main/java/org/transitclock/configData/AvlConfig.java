@@ -229,4 +229,13 @@ public class AvlConfig {
 			new BooleanConfigValue("transitclock.avl.shouldLogToStdOut", false,
 					"For debugging. Logs each AVL report to stdout if set "
 					+ "to true. Default is false.");
+
+
+	public static String avlAllowedRoutes() {
+		return avlAllowedRoutes.getValue();
+	}
+	public static StringConfigValue avlAllowedRoutes =
+			new StringConfigValue("transitclock.avl.allowedRoutes",
+					"*",
+					"List of acceptable routes for incoming avl data. Defaults to * which allows all.");
 }
