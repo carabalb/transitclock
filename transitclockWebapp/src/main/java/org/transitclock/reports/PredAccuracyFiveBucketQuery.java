@@ -262,7 +262,7 @@ public class PredAccuracyFiveBucketQuery extends PredictionAccuracyQuery {
 		String beginTime = null;
 		String endTime = null;
 		String routeIds[] = { };
-		String source = "Transitime";
+		String source = "Transitclock";
 
 		String dbType = "postgresql";// "mysql";
 		String dbHost = "192.168.99.100";// "localhost";

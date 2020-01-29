@@ -539,7 +539,7 @@ abstract public class PredictionAccuracyQuery {
 
 
 		String mySql = "SELECT "
-				+ "     abs(((unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)))/60 div 1) as predLength, "
+				+ "     ROUND((unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime))/60) as predLength, "
 				+ "     pa1.predictionAccuracyMsecs/1000 as predAccuracy, "
 				+ "     predictionSource as source "
 				+ "FROM PredictionAccuracy AS pa1 "
@@ -549,20 +549,24 @@ abstract public class PredictionAccuracyQuery {
 				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) "
 				+ mySqlTimeSql
 				+ " AND "
-				+ "abs(unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)) <= 1200 " //20 mins
+				+ "unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime) <= 1200 " // < 20 mins
+				+ " AND "
+				+ "unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime) >= 0 " // >= 0 mins
 				+ " AND "
 				+ "pa1.id IN ("
 				+ "     SELECT pa2.id "
 				+ "     FROM PredictionAccuracy AS pa2 "
 				+ "     WHERE "
-				+ "     abs(((unix_timestamp(pa2.arrivalDepartureTime)-unix_timestamp(pa2.predictionReadTime)))/60 div 1) in (1, 5, 10, 15, 20) "
+				+ "     ROUND((unix_timestamp(pa2.arrivalDepartureTime)-unix_timestamp(pa2.predictionReadTime))/60) in (1, 5, 10, 15, 20) "
 				+ "     AND "
 				+ "		pa1.arrivalDepartureTime BETWEEN "
 				+ "		CAST(? AS DATETIME) "
 				+ "		AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) "
 				+ 		mySqlTimeSql
 				+ " 	AND "
-				+ "		abs(unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)) <= 1200 "
+				+ "		unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime) <= 1200 "
+				+ " 	AND "
+				+ "		unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime) >= 0 "
 				+ "	) "
 				+ routeSql
 				+ stopSql
@@ -673,6 +677,8 @@ abstract public class PredictionAccuracyQuery {
 
 					}
 			}
+
+			System.out.println(statement.toString());
 
 			// Actually execute the query
 			ResultSet rs = statement.executeQuery();

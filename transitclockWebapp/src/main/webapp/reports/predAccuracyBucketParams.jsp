@@ -56,7 +56,7 @@
                       title="How early a vehicle can arrive compared to the prediction
             and still be acceptable. Must be a positive number to indicate
             early."
-              value="0.0"
+              value="1.0"
               step="0.1"
               type="number"
                />
