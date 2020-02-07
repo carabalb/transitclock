@@ -25,6 +25,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.ClassConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.blockAssigner.BlockAssigner;
@@ -58,16 +59,23 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 			"transitclock.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
 			"URL to access gtfs-rt trip updates.");
 
-	
-  private static ClassConfigValue translatorConfig =
-      new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null, 
-          "Implementation of GTFSRealtimeTranslator to perform " + 
-      "the translation of stopIds and other rt quirks");
-	
-  // if stopIds needs optional parsing/translation
-  private GTFSRealtimeTranslator translator = null;
+	private static final BooleanConfigValue processArrivals = new BooleanConfigValue(
+			"transitclock.predAccuracy.processArrivals", true,
+			"Whether to process arrivals in gtfs-rt prediction accuracy module.");
 
-  private Set<String> routeFilterSet = new HashSet<>();
+	private static final BooleanConfigValue processDepartures = new BooleanConfigValue(
+			"transitclock.predAccuracy.processDepartures", true,
+			"Whether to process departures in gtfs-rt prediction accuracy module.");
+	
+  	private static ClassConfigValue translatorConfig =
+		  new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null,
+			  "Implementation of GTFSRealtimeTranslator to perform " +
+		  "the translation of stopIds and other rt quirks");
+
+  	// if stopIds needs optional parsing/translation
+  	private GTFSRealtimeTranslator translator = null;
+
+  	private Set<String> routeFilterSet = new HashSet<>();
 
 	/**
 	 * @return the gtfstripupdateurl
@@ -239,7 +247,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 												Date eventTime = null;
 												if (scheduledTime != null) {
 													eventTime = null;
-													if (stopTime.hasArrival()) {
+													if (processArrivals.getValue() && stopTime.hasArrival()) {
 														if (stopTime.getArrival().hasTime()) {
 															eventTime = new Date(stopTime.getArrival().getTime() * 1000);
 
@@ -325,7 +333,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 																		gtfsTrip.getRouteId(), direction, stopId,
 																		tripId, update.getVehicle().getId(),
 																		eventTime, eventReadTime, true, new Boolean(false),
-																		"GTFS-rt", null, scheduledTime.toString());
+																		"GTFS-rt (Arrival)", null, scheduledTime.toString());
 
 																storePrediction(pred);
 															} else {
@@ -341,7 +349,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 														}
 													}
 													eventTime = null;
-													if (stopTime.hasDeparture()) {
+													if (processDepartures.getValue() && stopTime.hasDeparture()) {
 														if (stopTime.getDeparture().hasTime()) {
 															eventTime = new Date(stopTime.getDeparture().getTime() * 1000);
 
@@ -423,7 +431,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 																		gtfsTrip.getRouteId(), direction, stopId,
 																		tripId, update.getVehicle().getId(),
 																		eventTime, eventReadTime, false, new Boolean(false),
-																		"GTFS-rt", null, scheduledTime.toString());
+																		"GTFS-rt (Departures)", null, scheduledTime.toString());
 
 																storePrediction(pred);
 															} else {
