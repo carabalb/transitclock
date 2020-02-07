@@ -121,6 +121,11 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			new BooleanConfigValue("useHoldingTimeInPrediction",
 					false,
 					"Add holding time to prediction.");
+
+	private static BooleanConfigValue enableBiasAdjuster =
+			new BooleanConfigValue("transitclock.core.enableBiasAdjuster",
+					false,
+					"Enable a bias adjuster that uses an exponential formula to skew the prediction values.");
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
@@ -170,7 +175,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
 		
-		if(BiasAdjusterFactory.getInstance()!=null)
+		if(enableBiasAdjuster.getValue() && BiasAdjusterFactory.getInstance()!=null)
 		{
 			BiasAdjuster adjuster = BiasAdjusterFactory.getInstance();
 			predictionTime=avlReport.getTime()+adjuster.adjustPrediction(predictionTime-avlReport.getTime());			
