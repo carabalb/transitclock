@@ -16,10 +16,6 @@
  */
 package org.transitclock.reports;
 
-import java.text.ParseException;
-
-import org.transitclock.utils.Time;
-
 /**
  * Does a query of AVL data and returns result in JSON format.
  * 
@@ -68,10 +64,10 @@ public class AvlJsonQuery {
 		}
 //need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
-				+ "a.heading, a.timeProcessed, a.source, v.routeShortName "
+				+ "a.heading, a.timeProcessed, a.source, v.routeId "
 				+ "FROM AvlReports a "
 				+ "JOIN "
-				+ "(SELECT vehicleId, routeShortName, avlTime FROM VehicleStates "
+				+ "(SELECT vehicleId, routeId, avlTime FROM VehicleStates "
 				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ ") v "
@@ -85,7 +81,7 @@ public class AvlJsonQuery {
 			sql += " AND a.vehicleId='" + vehicleId + "' ";
 
 		if (routeId != null && !routeId.trim().isEmpty())
-			sql += " AND v.routeShortName='" + routeId + "' ";
+			sql += " AND v.routeId='" + routeId + "' ";
 		
 		// Make sure data is ordered by vehicleId so that can draw lines 
 		// connecting the AVL reports per vehicle properly. Also then need
