@@ -279,7 +279,12 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-nyc-transit-data-federation</artifactId>
-			<version>2.26.2-SNAPSHOT</version>
+			<version>2.26.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-nyc-report-archive</artifactId>
+			<version>2.26.2.2</version>
 		</dependency>
 	</dependencies>
 	<build>
