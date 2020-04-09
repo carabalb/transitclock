@@ -21,6 +21,7 @@ import com.google.transit.realtime.GtfsRealtime.*;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
@@ -86,6 +87,11 @@ public class GtfsRtTripFeed {
 			"Whether or not to include delay in the TripUpdate message");
 	private static final boolean INCLUDE_SKIPPED_STOPS = includeSkippedStops.getValue();
 
+	private static BooleanConfigValue prependAgencyToTripId = new BooleanConfigValue(
+			"transitclock.api.prependAgencyToTripId", false,
+			"Whether or not to prepend Agency to Trip Id");
+	private static final boolean PREPEND_AGENCY_TRIP_ID = prependAgencyToTripId.getValue();
+
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
 	private static final int SCHED_BASED_PRED_UNCERTAINTY_VALUE = 5 * 60;
@@ -130,8 +136,15 @@ public class GtfsRtTripFeed {
 		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
 
 		String routeId = firstPred.getRouteId();
-		String tripId = firstPred.getTripId();
 		String vehicleId = firstPred.getVehicleId();
+		String agencyId = "";
+		if(vehicleId != null) {
+			agencyId = AgencyAndId.convertFromString(vehicleId).getAgencyId();
+		}
+		String tripId = firstPred.getTripId();
+		if(PREPEND_AGENCY_TRIP_ID){
+			tripId = agencyId + AgencyAndIdLibrary.ID_SEPARATOR + tripId;
+		}
 
 		if (routeId != null)
 			tripDescriptor.setRouteId(routeId);
@@ -594,6 +607,43 @@ public class GtfsRtTripFeed {
 			IpcPrediction ip1 = (IpcPrediction) o1;
 			IpcPrediction ip2 = (IpcPrediction) o2;
 			return ip1.getGtfsStopSeq() - ip2.getGtfsStopSeq();
+		}
+	}
+
+	public static class AgencyAndIdLibrary {
+
+		public static final char ID_SEPARATOR = '_';
+
+		/**
+		 * Given an id of the form "agencyId_entityId", parses into a
+		 * {@link AgencyAndId} id object.
+		 *
+		 * @param value id of the form "agencyId_entityId"
+		 * @return an id object
+		 */
+		public static AgencyAndId convertFromString(String value) {
+			if( value == null || value.isEmpty())
+				return null;
+			int index = value.indexOf(ID_SEPARATOR);
+			if (index == -1) {
+				throw new IllegalStateException("invalid agency-and-id: " + value);
+			} else {
+				return new AgencyAndId(value.substring(0, index),
+						value.substring(index + 1));
+			}
+		}
+
+		/**
+		 * Given an {@link AgencyAndId} object, creates a string representation of the
+		 * form "agencyId_entityId"
+		 *
+		 * @param aid an id object
+		 * @return a string representation of the form "agencyId_entityId"
+		 */
+		public static String convertToString(AgencyAndId aid) {
+			if( aid == null)
+				return null;
+			return aid.getAgencyId() + ID_SEPARATOR + aid.getId();
 		}
 	}
 }
